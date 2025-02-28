@@ -793,7 +793,7 @@
                      )
                      (("New Char Max Money: ON" "New Char Max Money: OFF")
                         {set $yourmonies {! $yourmonies}}
-                        {set_elem {find $syscfg tour default_money} 1 999999999}
+                        {set_elem {find $syscfg tour default_money} 1 {if_else $yourmonies 999999999 100}}
                      )
                      (("Show FC Ring: ON" "Show FC Ring: OFF")
                         {set $fcring {! $fcring}}

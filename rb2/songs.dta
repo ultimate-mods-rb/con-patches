@@ -62,6 +62,92 @@
             {set $fcring TRUE}
             {set_elem {find $syscfg sound slider} 1 -96}
             {set_elem {find $syscfg tour default_difficulty} 1 kDifficultyExpert}
+            ; i'm bad at scripting lol. this totally could be rewritten.
+            {foreach $char
+               (
+                  rb2drum0
+                  rb2drum1
+                  rb2drum2
+                  rb2drum4
+                  rb2drum6
+                  rb2drum7
+                  rb2drum8
+                  rb2drum11
+                  rb2drum13
+                  rb2drum14
+                  rb2drum16
+                  rb2drum17
+                  rb2guitar2
+                  rb2guitar3
+                  rb2guitar8
+                  drum0
+                  drum1
+                  drum2
+                  drum3
+                  drum4
+                  drum5
+                  drum6
+                  drum7
+                  drum8
+                  drum9
+                  drum10
+                  drum11
+                  drum12
+                  drum13
+                  drum14
+                  drum15
+                  drum16
+                  drum17
+                  guitar0
+                  guitar1
+                  guitar2
+                  guitar3
+                  guitar4
+                  guitar5
+                  guitar7
+                  guitar8
+                  guitar10
+                  guitar11
+                  guitar12
+                  guitar13
+                  guitar14
+                  guitar16
+                  guitar17
+                  guitar18
+                  guitar19
+                  guitar20
+                  guitar21
+                  guitar22
+                  guitar23
+                  guitar24
+                  guitar26
+                  guitar27
+                  guitar28
+                  guitar29
+                  guitar30
+                  guitar31
+                  guitar33
+                  guitar34
+                  vocals0
+                  vocals1
+                  vocals2
+                  vocals3
+                  vocals4
+                  vocals5
+                  vocals8
+                  vocals9
+                  vocals10
+                  vocals11
+                  vocals12
+                  vocals14
+                  vocals15
+                  vocals17
+                  vocals18
+                  vocals19
+                  vocals21
+               )
+               {push_back {find $syscfg characters prefab $char} (selectable TRUE)}
+            }
             ;start of modified screens/panels
             {delete coop_track_panel}
             {new

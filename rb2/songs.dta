@@ -1,3 +1,4 @@
+#ifdef TITLEID_ROCK_BAND_2
 (conpatch
    (name "2951257")
    (artist "music")
@@ -1464,3 +1465,4 @@
    (album_track_number 7)
    (base_points 476817)
 )
+#endif

@@ -61,6 +61,7 @@
             {set $whammypb TRUE}
             {set $misssounds TRUE}
             {set $fcring TRUE}
+            {set $vsyncrate 1}
             {set_elem {find $syscfg sound slider} 1 -96}
             {set_elem {find $syscfg tour default_difficulty} 1 kDifficultyExpert}
             ; i'm bad at scripting lol. this totally could be rewritten.
@@ -148,6 +149,12 @@
                   vocals21
                )
                {push_back {find $syscfg characters prefab $char} (selectable TRUE)}
+            }
+            {push_back {find $syscfg objects OutfitLoader types female category legs outfits}
+               (naked
+                  (genre shell_shop_thriftstore)
+                  (cost 0)
+               )
             }
             ;start of modified screens/panels
             {delete coop_track_panel}
@@ -771,6 +778,7 @@
             }
             {func
                set_graphics
+               {rnd set_sync $vsyncrate}
                {if $blackbg
                   {world_panel set_showing FALSE}
                }

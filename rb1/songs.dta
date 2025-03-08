@@ -64,6 +64,7 @@
             {set $fcring TRUE}
             {set $vsyncrate 1}
             {set $pad_inst 1}
+            {set $pad_map 1}
             {set $cnt_slot1 kPad_L2}
             {set $cnt_slot2 kPad_L1}
             {set $cnt_slot3 kPad_R1}
@@ -176,6 +177,7 @@
                   (
                      {if_else $secondkick "Second Kick Mapping: ON" "Second Kick Mapping: OFF"}
                      {sprint "- Pad is: " {switch $pad_inst (1 "Vocals") (2 "Guitar") (3 "Drum")} " +"}
+                     {sprint "- Pad Mapping: " {switch $pad_map (1 "Custom") (2 "RB Guitar") (3 "Drum") (4 "GH Guitar") (5 "PS2 Guitar")} " +"}
                      {sprint "- Slot 1: " {get_btn_from_var $cnt_slot1} " +"}
                      {sprint "- Slot 2: " {get_btn_from_var $cnt_slot2} " +"}
                      {sprint "- Slot 3: " {get_btn_from_var $cnt_slot3} " +"}
@@ -463,21 +465,33 @@
                                        }
                                     )
                                     (2
-                                       {set $cnt_slot1 {l_set_slot $cnt_slot1}}
+                                       {set $pad_map
+                                          {switch $pad_map
+                                             (5 4)
+                                             (4 3)
+                                             (3 2)
+                                             (2 1)
+                                             1
+                                          }
+                                       }
+                                       {set_pad_map}
                                     )
                                     (3
-                                       {set $cnt_slot2 {l_set_slot $cnt_slot2}}
+                                       {set $cnt_slot1 {l_set_slot $cnt_slot1}}
                                     )
                                     (4
-                                       {set $cnt_slot3 {l_set_slot $cnt_slot3}}
+                                       {set $cnt_slot2 {l_set_slot $cnt_slot2}}
                                     )
                                     (5
-                                       {set $cnt_slot4 {l_set_slot $cnt_slot4}}
+                                       {set $cnt_slot3 {l_set_slot $cnt_slot3}}
                                     )
                                     (6
-                                       {set $cnt_slot5 {l_set_slot $cnt_slot5}}
+                                       {set $cnt_slot4 {l_set_slot $cnt_slot4}}
                                     )
                                     (7
+                                       {set $cnt_slot5 {l_set_slot $cnt_slot5}}
+                                    )
+                                    (8
                                        {set $cnt_star {l_set_slot $cnt_star}}
                                     )
                                  }
@@ -547,21 +561,33 @@
                                        }
                                     )
                                     (2
-                                       {set $cnt_slot1 {r_set_slot $cnt_slot1}}
+                                       {set $pad_map
+                                          {switch $pad_map
+                                             (1 2)
+                                             (2 3)
+                                             (3 4)
+                                             (4 5)
+                                             5
+                                          }
+                                       }
+                                       {set_pad_map}
                                     )
                                     (3
-                                       {set $cnt_slot2 {r_set_slot $cnt_slot2}}
+                                       {set $cnt_slot1 {r_set_slot $cnt_slot1}}
                                     )
                                     (4
-                                       {set $cnt_slot3 {r_set_slot $cnt_slot3}}
+                                       {set $cnt_slot2 {r_set_slot $cnt_slot2}}
                                     )
                                     (5
-                                       {set $cnt_slot4 {r_set_slot $cnt_slot4}}
+                                       {set $cnt_slot3 {r_set_slot $cnt_slot3}}
                                     )
                                     (6
-                                       {set $cnt_slot5 {r_set_slot $cnt_slot5}}
+                                       {set $cnt_slot4 {r_set_slot $cnt_slot4}}
                                     )
                                     (7
+                                       {set $cnt_slot5 {r_set_slot $cnt_slot5}}
+                                    )
+                                    (8
                                        {set $cnt_star {r_set_slot $cnt_star}}
                                     )
                                  }
@@ -592,6 +618,13 @@
                   {ui goto_screen selchannel_screen}
                }
             }
+            {func
+               set_pad_map
+               {foreach $type (analog dualshock)
+                  {set_elem {find $syscfg joypad controller_mapping $type} 1 {switch $pad_map (1 joypad) #ifdef HX_XBOX (2 ro_guitar_xbox) (3 hx_drums_xbox) #else (2 hx_guitar_ps3) (3 hx_drums_ps3) #endif  (4 ro_guitar_ps3) (5 guitar)}}
+               }
+            }
+            {set_pad_map}
             {func
                set_graphics
                {rnd set_sync $vsyncrate}

@@ -286,6 +286,7 @@
                {channels.lst set_data
                   (
                      "Export Songs"
+                     {if_else {profile_mgr get_overscan} "Overscan: ON" "Overscan: OFF"}
                   )
                }
             }
@@ -370,6 +371,9 @@
                         )
                         ("Export Songs"
                            {ui goto_screen export_initialize_screen}
+                        )
+                        (("Overscan: ON" "Overscan: OFF")
+                           {profile_mgr set_overscan {! {profile_mgr get_overscan}}}
                         )
                      }
                      {switch [menu]

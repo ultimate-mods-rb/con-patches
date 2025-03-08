@@ -1,0 +1,793 @@
+#ifdef TITLEID_ROCK_BAND
+(conpatch
+   (name "2951257")
+   (artist "music")
+   (master TRUE)
+   (context 1026)
+   (song
+     (name        "songs/conpatch/conpatch")
+     (tracks
+        ((drum (0 1))
+         (bass 2)
+         (guitar (3))
+         (vocals (4))
+        )
+     )
+     (pans        (  0.0  -1.0  1.0   -1.0  1.0   0.0 ))
+     (vols        ( -1.0  -3.5 -3.5   -5.0 -5.0  -4.0 ))
+     (cores       (  -1    -1   -1     -1   -1    -1  ))
+     (drum_solo
+        (seqs (kick.cue snare.cue tom1.cue tom2.cue crash.cue))
+     )
+     (drum_freestyle
+        (seqs (kick.cue snare.cue hat.cue ride.cue crash.cue))
+     )
+     (midi_file "songs/conpatch/conpatch.mid")
+     (hopo_threshold 90)
+   )
+   (song_scroll_speed 2300)
+   (bank sfx/tambourine_bank.milo)
+   (anim_tempo kTempoSlow)
+   (preview 2 4)
+   (rank
+      (drum 1)
+      (guitar 1)
+      (bass 1)
+      (vocals 1)
+      (band 1)
+   )
+   (genre trash)
+   (decade the00s)
+   (vocal_gender male)
+
+   (format 5)
+   (version 3)
+   (fake TRUE)   
+   ; harmonix i really see why you moved away from dta. what the fuck were you thinking when you made such a vulnerable scripting language. 
+   (downloaded
+      {do
+         {unless $patched
+            ;start of init vars
+            {set $trackspeed 1.0}
+            {set $speedmod 1.0}
+            {set $hwlength 1.0} ; awesomeness actually
+            {set $syncdifspeeds FALSE}
+            {set $scrbloom TRUE}
+            {set $camerashake TRUE}
+            {set $fxdof TRUE}
+            {set $scrnoise FALSE}
+            {set $mbblend TRUE}
+            {set $emulatefps 60}
+            {set $trkmuting TRUE}
+            {set $whammypb TRUE}
+            {set $misssounds TRUE}
+            {set $fcring TRUE}
+            {set $vsyncrate 1}
+            {set $pad_inst 1}
+            {set $cnt_slot1 kPad_L2}
+            {set $cnt_slot2 kPad_L1}
+            {set $cnt_slot3 kPad_R1}
+            {set $cnt_slot4 kPad_R2}
+            {set $cnt_slot5 kPad_X}
+            {set $cnt_star kPad_Select}
+            {set_elem {find $syscfg beatmatcher controller joypad slots} 1 {` $cnt_slot1 }}
+            {set_elem {find $syscfg beatmatcher controller joypad slots} 3 {` $cnt_slot2 }}
+            {set_elem {find $syscfg beatmatcher controller joypad slots} 5 {` $cnt_slot3 }}
+            {set_elem {find $syscfg beatmatcher controller joypad slots} 7 {` $cnt_slot4 }}
+            {set_elem {find $syscfg beatmatcher controller joypad slots} 9 {` $cnt_slot5 }}
+            {set_elem {find $syscfg beatmatcher controller joypad force_mercury} 1 {` $cnt_star }}
+            {foreach $type (analog dualshock)
+               {set_elem {find $syscfg joypad instrument_mapping $type} 1 {` {switch $pad_inst (1 kControllerVocals) (2 kControllerGuitar) (3 kControllerDrum)} }}
+            }
+            {set $cheat.bwt_no_min_participants TRUE}
+            {foreach $mode (qp_hth_local qp_hth_local_split qp_hth_unranked qp_hth_unranked_split qp_hth_ranked qp_hth_ranked_split)
+               {push_back {find $syscfg modes $mode} {` (min_players 2) }}
+            }
+            {set_elem {find $syscfg modes defaults min_players} 1 1}
+            {set_elem {find $syscfg modes defaults show_loading_images} 1 TRUE}
+            {set_elem {find $syscfg modes defaults can_lose} 1 {` {! $nofail} }}
+            {set_elem {find $syscfg modes defaults show_track} 1 {` {! $perfmode} }}
+            {set_elem {find $syscfg modes defaults unlock_song_initial_num} 1 3000}
+            {set_elem {find $syscfg beatmatcher watcher pitch_bend_range} 1 {` $whammypb }}
+            {set_elem {find $syscfg beatmatcher audio mute_volume} 1 {` {if_else $trkmuting -96.0 -0.001} }}
+            {set_elem {find $syscfg sound slider} 1 -96}
+            {set_elem {find $syscfg tour solo default_difficulty} 1 kDifficultyExpert}
+            {set_elem {find $syscfg tour default_money} 1 {` {if_else $yourmonies 999999999 100} }}
+
+            ;small example script of how to find elems. crashes the game as there are not 1000 elems but works.
+            ;{foreach $num
+            ;   (
+            ;      1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 219 220 221 222 223 224 225 226 227 228 229 230 231 232 233 234 235 236 237 238 239 240 241 242 243 244 245 246 247 248 249 250 251 252 253 254 255 256 257 258 259 260 261 262 263 264 265 266 267 268 269 270 271 272 273 274 275 276 277 278 279 280 281 282 283 284 285 286 287 288 289 290 291 292 293 294 295 296 297 298 299 300 301 302 303 304 305 306 307 308 309 310 311 312 313 314 315 316 317 318 319 320 321 322 323 324 325 326 327 328 329 330 331 332 333 334 335 336 337 338 339 340 341 342 343 344 345 346 347 348 349 350 351 352 353 354 355 356 357 358 359 360 361 362 363 364 365 366 367 368 369 370 371 372 373 374 375 376 377 378 379 380 381 382 383 384 385 386 387 388 389 390 391 392 393 394 395 396 397 398 399 400 401 402 403 404 405 406 407 408 409 410 411 412 413 414 415 416 417 418 419 420 421 422 423 424 425 426 427 428 429 430 431 432 433 434 435 436 437 438 439 440 441 442 443 444 445 446 447 448 449 450 451 452 453 454 455 456 457 458 459 460 461 462 463 464 465 466 467 468 469 470 471 472 473 474 475 476 477 478 479 480 481 482 483 484 485 486 487 488 489 490 491 492 493 494 495 496 497 498 499 500 501 502 503 504 505 506 507 508 509 510 511 512 513 514 515 516 517 518 519 520 521 522 523 524 525 526 527 528 529 530 531 532 533 534 535 536 537 538 539 540 541 542 543 544 545 546 547 548 549 550 551 552 553 554 555 556 557 558 559 560 561 562 563 564 565 566 567 568 569 570 571 572 573 574 575 576 577 578 579 580 581 582 583 584 585 586 587 588 589 590 591 592 593 594 595 596 597 598 599 600 601 602 603 604 605 606 607 608 609 610 611 612 613 614 615 616 617 618 619 620 621 622 623 624 625 626 627 628 629 630 631 632 633 634 635 636 637 638 639 640 641 642 643 644 645 646 647 648 649 650 651 652 653 654 655 656 657 658 659 660 661 662 663 664 665 666 667 668 669 670 671 672 673 674 675 676 677 678 679 680 681 682 683 684 685 686 687 688 689 690 691 692 693 694 695 696 697 698 699 700 701 702 703 704 705 706 707 708 709 710 711 712 713 714 715 716 717 718 719 720 721 722 723 724 725 726 727 728 729 730 731 732 733 734 735 736 737 738 739 740 741 742 743 744 745 746 747 748 749 750 751 752 753 754 755 756 757 758 759 760 761 762 763 764 765 766 767 768 769 770 771 772 773 774 775 776 777 778 779 780 781 782 783 784 785 786 787 788 789 790 791 792 793 794 795 796 797 798 799 800 801 802 803 804 805 806 807 808 809 810 811 812 813 814 815 816 817 818 819 820 821 822 823 824 825 826 827 828 829 830 831 832 833 834 835 836 837 838 839 840 841 842 843 844 845 846 847 848 849 850 851 852 853 854 855 856 857 858 859 860 861 862 863 864 865 866 867 868 869 870 871 872 873 874 875 876 877 878 879 880 881 882 883 884 885 886 887 888 889 890 891 892 893 894 895 896 897 898 899 900 901 902 903 904 905 906 907 908 909 910 911 912 913 914 915 916 917 918 919 920 921 922 923 924 925 926 927 928 929 930 931 932 933 934 935 936 937 938 939 940 941 942 943 944 945 946 947 948 949 950 951 952 953 954 955 956 957 958 959 960 961 962 963 964 965 966 967 968 969 970 971 972 973 974 975 976 977 978 979 980 981 982 983 984 985 986 987 988 989 990 991 992 993 994 995 996 997 998 999 1000
+            ;   )
+            ;   {if {find {elem {find $syscfg ui init} $num} set_results}
+            ;      {$this save_objects {sprint #ifdef HX_XBOX "GAME:/" #else "GD:/dev_hdd0/game/BLUS30050/USRDIR/" #endif $num ".milo"}}
+            ;   }
+            ;}
+
+            {resize {elem {elem {find $syscfg ui init} 212} 5} 0}
+            {push_back {elem {elem {find $syscfg ui init} 212} 5} pos}
+            {resize {elem {elem {find $syscfg ui init} 212} 6} 0}
+            {push_back {elem {elem {find $syscfg ui init} 212} 6} menu}
+            {push_back {elem {find $syscfg ui init} 212}
+               {`
+                  (ret )
+               }
+            }
+            {func
+               set_main_to_lst
+               {set [menu] 0}
+               {set [pos] 0}
+               {title.lbl set text_token "Mod Settings"}
+               {channels.lst set_data ("Modifiers" "Speed Settings" "Graphics Settings" "Controller Settings" "Other")}
+               {if [ret]
+                  {set [pos] [ret]}
+                  {channels.lst set_selected [pos]}
+               }
+            }
+            {func
+               set_modifiers_to_lst
+               {set [menu] 1}
+               {title.lbl set text_token "Modifiers"}
+               {channels.lst set_data
+                  (
+                     {if_else $whammypb "Whammy Pitch Bending: ON" "Whammy Pitch Bending: OFF"}
+                     {if_else $trkmuting "Track Muting: ON" "Track Muting: OFF"}
+                     {if_else $yourmonies "New Char Max Money: ON" "New Char Max Money: OFF"}
+                     {if_else $nofail "No Fail Mode: ON" "No Fail Mode: OFF"}
+                     {if_else $perfmode "Performance Mode: ON" "Performance Mode: OFF"}
+                     {if_else $awesome "Awesomeness Detection: ON" "Awesomeness Detection: OFF"}
+                  )
+               }
+            }
+            {func
+               set_speeds_to_lst
+               {set [menu] 2}
+               {title.lbl set text_token "Speed Settings"}
+               {channels.lst set_data
+                  (
+                     {if_else $syncdifspeeds "Sync Dificulty Speeds: ON" "Sync Dificulty Speeds: OFF"}
+                     {sprintf "- Song Speed: %d% +" {int {+ 0.5 {* $speedmod 100}}}}
+                     {sprintf "- Track Speed: %d% +" {int {+ 0.5 {* $trackspeed 100}}}}
+                  )
+               }
+            }
+            {func
+               set_gfx_to_lst
+               {set [menu] 3}
+               {title.lbl set text_token "Graphics Settings"}
+               {channels.lst set_data
+                  (
+                     {if_else $blackbg "Disable Venues: ON" "Disable Venues: OFF"}
+                     {sprintf "- Venue FPS: %dFPS +" $emulatefps}
+                     {sprint "- Vsync Rate: " {switch $vsyncrate (1 "full") (2 "half") (4 "quarter") "infinite"} " +"}
+                     {if_else $fxdof "Depth of Field: ON" "Depth of Field: OFF"}
+                     {if_else $scrnoise "Film Grain: ON" "Film Grain: OFF"}
+                     {if_else $scrbloom "Bloom: ON" "Bloom: OFF"}
+                     {if_else $camerashake "Camera Shake: ON" "Camera Shake: OFF"}
+                     {if_else $mbblend "Motion Blur: ON" "Motion Blur: OFF"}
+                  )
+               }
+            }
+            {func
+               set_cnt_to_lst
+               {set [menu] 4}
+               {title.lbl set text_token "Controller Settings"}
+               {channels.lst set_data
+                  (
+                     {if_else $secondkick "Second Kick Mapping: ON" "Second Kick Mapping: OFF"}
+                     {sprint "- Pad is: " {switch $pad_inst (1 "Vocals") (2 "Guitar") (3 "Drum")} " +"}
+                     {sprint "- Slot 1: " {get_btn_from_var $cnt_slot1} " +"}
+                     {sprint "- Slot 2: " {get_btn_from_var $cnt_slot2} " +"}
+                     {sprint "- Slot 3: " {get_btn_from_var $cnt_slot3} " +"}
+                     {sprint "- Slot 4: " {get_btn_from_var $cnt_slot4} " +"}
+                     {sprint "- Slot 5: " {get_btn_from_var $cnt_slot5} " +"}
+                     {sprint "- Overdrive: " {get_btn_from_var $cnt_star} " +"}
+                  )
+               }
+            }
+            {func
+               get_btn_from_var
+               ($var)
+               {switch $var
+                  (kPad_L2
+                     "LT"
+                  )
+                  (kPad_L1
+                     "LB"
+                  )
+                  (kPad_R1
+                     "RB"
+                  )
+                  (kPad_R2
+                     "RT"
+                  )
+                  (kPad_X
+                     "A"
+                  )
+                  (kPad_Circle
+                     "B"
+                  )
+                  (kPad_Square
+                     "X"
+                  )
+                  (kPad_Tri
+                     "Y"
+                  )
+                  (kPad_DUp
+                     "Up"
+                  )
+                  (kPad_DDown
+                     "Down"
+                  )
+                  (kPad_DLeft
+                     "Left"
+                  )
+                  (kPad_DRight
+                     "Right"
+                  )
+                  (kPad_L3
+                     "LS"
+                  )
+                  (kPad_R3
+                     "RS"
+                  )
+                  (kPad_Select
+                     "Back"
+                  )
+                  "ERROR"
+               }
+            }
+            {func l_set_slot
+               ($var)
+               {switch $var
+                  (kPad_L1 kPad_L2)
+                  (kPad_R1 kPad_L1)
+                  (kPad_R2 kPad_R1)
+                  (kPad_X kPad_R2)
+                  (kPad_Circle kPad_X)
+                  (kPad_Square kPad_Circle)
+                  (kPad_Tri kPad_Square)
+                  (kPad_DUp kPad_Tri)
+                  (kPad_DDown kPad_DUp)
+                  (kPad_DLeft kPad_DDown)
+                  (kPad_DRight kPad_DLeft)
+                  (kPad_L3 kPad_DRight)
+                  (kPad_R3 kPad_L3)
+                  (kPad_Select kPad_R3)
+                  kPad_L2
+               }
+            }
+            {func r_set_slot
+               ($var)
+               {switch $var
+                  (kPad_L2 kPad_L1)
+                  (kPad_L1 kPad_R1)
+                  (kPad_R1 kPad_R2)
+                  (kPad_R2 kPad_X)
+                  (kPad_X kPad_Circle)
+                  (kPad_Circle kPad_Square)
+                  (kPad_Square kPad_Tri)
+                  (kPad_Tri kPad_DUp)
+                  (kPad_DUp kPad_DDown)
+                  (kPad_DDown kPad_DLeft)
+                  (kPad_DLeft kPad_DRight)
+                  (kPad_DRight kPad_L3)
+                  (kPad_L3 kPad_R3)
+                  (kPad_R3 kPad_Select)
+                  kPad_Select
+               }
+            }
+            {func
+               set_other_to_lst
+               {set [menu] 5}
+               {title.lbl set text_token "Other"}
+               {channels.lst set_data
+                  (
+                     "Export Songs"
+                  )
+               }
+            }
+
+            {push_back {elem {elem {find $syscfg ui init} 212} 4}
+               {`
+                  {do
+                     {choose.lbl set_showing FALSE}
+                     {msg.lbl set text_token "CON Patch by Synchrony"}
+                     {set_main_to_lst}
+                  }
+               }
+            }
+            {push_back {elem {find $syscfg ui init} 212}
+               {`
+                  (SELECT_MSG
+                     {switch {$component selected_sym}
+                        ("Modifiers"
+                           {set [menu] 1}
+                        )
+                        (("Whammy Pitch Bending: ON" "Whammy Pitch Bending: OFF")
+                           {set $whammypb {! $whammypb}}
+                        )
+                        (("Track Muting: ON" "Track Muting: OFF")
+                           {set $trkmuting {! $trkmuting}}
+                        )
+                        (("New Char Max Money: ON" "New Char Max Money: OFF")
+                           {set $yourmonies {! $yourmonies}}
+                        )
+                        (("No Fail Mode: ON" "No Fail Mode: OFF")
+                           {set $nofail {! $nofail}}
+                        )
+                        (("Performance Mode: ON" "Performance Mode: OFF")
+                           {set $perfmode {! $perfmode}}
+                        )
+                        (("Awesomeness Detection: ON" "Awesomeness Detection: OFF")
+                           {set $awesome {! $awesome}}
+                        )
+                        ("Speed Settings"
+                           {set [pos] 0}
+                           {set [menu] 2}
+                        )
+                        (("Sync Dificulty Speeds: ON" "Sync Dificulty Speeds: OFF")
+                           {set $syncdifspeeds {! $syncdifspeeds}}
+                        )
+                        ("Graphics Settings"
+                           {set [pos] 0}
+                           {set [menu] 3}
+                        )
+                        (("Disable Venues: ON" "Disable Venues: OFF")
+                           {set $blackbg {! $blackbg}}
+                        )
+                        (("Depth of Field: ON" "Depth of Field: OFF")
+                           {set $fxdof {! $fxdof}}
+                        )
+                        (("Film Grain: ON" "Film Grain: OFF")
+                           {set $scrnoise {! $scrnoise}}
+                        )
+                        (("Bloom: ON" "Bloom: OFF")
+                           {set $scrbloom {! $scrbloom}}
+                        )
+                        (("Camera Shake: ON" "Camera Shake: OFF")
+                           {set $camerashake {! $camerashake}}
+                        )
+                        (("Motion Blur: ON" "Motion Blur: OFF")
+                           {set $mbblend {! $mbblend}}
+                        )
+                        ("Controller Settings"
+                           {set [pos] 0}
+                           {set [menu] 4}
+                        )
+                        (("Second Kick Mapping: ON" "Second Kick Mapping: OFF")
+                           {set $secondkick {! $secondkick}}
+                           {if_else $secondkick
+                              {enable_second_kick_mapping}
+                              {disable_second_kick_mapping}
+                           }
+                        )
+                        ("Other"
+                           {set [pos] 0}
+                           {set [menu] 5}
+                        )
+                        ("Export Songs"
+                           {ui goto_screen export_initialize_screen}
+                        )
+                     }
+                     {switch [menu]
+                        (1 {set_modifiers_to_lst})
+                        (2 {set_speeds_to_lst})
+                        (3 {set_gfx_to_lst})
+                        (4 {set_cnt_to_lst})
+                        (5 {set_other_to_lst})
+                     }
+                     {channels.lst set_selected [pos]}
+                  )
+               }
+            }
+            {push_back {elem {find $syscfg ui init} 212}
+               {`
+                  (SCROLL_MSG
+                     {set [pos] {channels.lst selected_pos}}
+                     {unless [menu]
+                        {set [ret] {channels.lst selected_pos}}
+                     }
+                  )
+               }
+            }
+            {push_back {elem {find $syscfg ui init} 212}
+               {`
+                  (BUTTON_DOWN_MSG
+                     {switch $button
+                        (kPad_Tri
+                           {synth play button_back}
+                           {if_else [menu]
+                              {set_main_to_lst}
+                              {ui goto_screen meta_loading_options_screen}
+                           }
+                        )
+                        (kPad_DLeft
+                           {switch [menu]
+                              (2
+                                 {switch [pos]
+                                    (1
+                                       {if {> $speedmod 1}
+                                          {set $speedmod
+                                             {- $speedmod 0.05}
+                                          }
+                                       }
+                                    )
+                                    (2
+                                       {if {> $trackspeed 0.55}
+                                          {set $trackspeed
+                                             {- $trackspeed 0.05}
+                                          }
+                                       }
+                                    )
+                                 }
+                                 {set_speeds_to_lst}
+                              )
+                              (3
+                                 {switch [pos]
+                                    (1
+                                       {set $emulatefps
+                                          {switch $emulatefps
+                                             (60 30)
+                                             (30 24)
+                                             (24 15)
+                                             (15 12)
+                                             (12 6)
+                                             1
+                                          }
+                                       }
+                                    )
+                                    (2
+                                       {set $vsyncrate
+                                          {switch $vsyncrate
+                                             (4 2)
+                                             (2 1)
+                                             (1 0)
+                                             0
+                                          }
+                                       }
+                                       {rnd set_sync $vsyncrate}
+                                    )
+                                 }
+                                 {set_gfx_to_lst}
+                              )
+                              (4
+                                 {switch [pos]
+                                    (1
+                                       {set $pad_inst
+                                          {switch $pad_inst
+                                             (3 2)
+                                             (2 1)
+                                             1
+                                          }
+                                       }
+                                    )
+                                    (2
+                                       {set $cnt_slot1 {l_set_slot $cnt_slot1}}
+                                    )
+                                    (3
+                                       {set $cnt_slot2 {l_set_slot $cnt_slot2}}
+                                    )
+                                    (4
+                                       {set $cnt_slot3 {l_set_slot $cnt_slot3}}
+                                    )
+                                    (5
+                                       {set $cnt_slot4 {l_set_slot $cnt_slot4}}
+                                    )
+                                    (6
+                                       {set $cnt_slot5 {l_set_slot $cnt_slot5}}
+                                    )
+                                    (7
+                                       {set $cnt_star {l_set_slot $cnt_star}}
+                                    )
+                                 }
+                                 {set_cnt_to_lst}
+                              )
+                           }
+                           {channels.lst set_selected [pos]}
+                        )
+                        (kPad_DRight
+                           {switch [menu]
+                              (2
+                                 {switch [pos]
+                                    (1
+                                       {if {< $speedmod 2.45}
+                                          {set $speedmod
+                                             {+ $speedmod 0.05}
+                                          }
+                                       }
+                                    )
+                                    (2
+                                       {if {< $trackspeed 2.45}
+                                          {set $trackspeed
+                                             {+ $trackspeed 0.05}
+                                          }
+                                       }
+                                    )
+                                 }
+                                 {set_speeds_to_lst}
+                              )
+                              (3
+                                 {switch [pos]
+                                    (1
+                                       {set $emulatefps
+                                          {switch $emulatefps
+                                             (1 6)
+                                             (6 12)
+                                             (12 15)
+                                             (15 24)
+                                             (24 30)
+                                             60
+                                          }
+                                       }
+                                    )
+                                    (2
+                                       {set $vsyncrate
+                                          {switch $vsyncrate
+                                             (1 2)
+                                             (2 4)
+                                             (4 4)
+                                             1
+                                          }
+                                       }
+                                       {rnd set_sync $vsyncrate}
+                                    )
+                                 }
+                                 {set_gfx_to_lst}
+                              )
+                              (4
+                                 {switch [pos]
+                                    (1
+                                       {set $pad_inst
+                                          {switch $pad_inst
+                                             (1 2)
+                                             (2 3)
+                                             3
+                                          }
+                                       }
+                                    )
+                                    (2
+                                       {set $cnt_slot1 {r_set_slot $cnt_slot1}}
+                                    )
+                                    (3
+                                       {set $cnt_slot2 {r_set_slot $cnt_slot2}}
+                                    )
+                                    (4
+                                       {set $cnt_slot3 {r_set_slot $cnt_slot3}}
+                                    )
+                                    (5
+                                       {set $cnt_slot4 {r_set_slot $cnt_slot4}}
+                                    )
+                                    (6
+                                       {set $cnt_slot5 {r_set_slot $cnt_slot5}}
+                                    )
+                                    (7
+                                       {set $cnt_star {r_set_slot $cnt_star}}
+                                    )
+                                 }
+                                 {set_cnt_to_lst}
+                              )
+                           }
+                           {channels.lst set_selected [pos]}
+                        )
+                        kDataUnhandled
+                     }
+                  )
+               }
+            }
+            {push_back {find {elem {find $syscfg ui init} #ifdef HX_XBOX 751 #else 738 #endif} enter}
+               {`
+                  {ui goto_screen export_export_screen}
+               }
+            }
+            {push_back {elem {find $syscfg ui init} 428}
+               {`
+                  (enter
+                     {exportsongs.btn set text_token "Mod Settings"}
+                  )
+               }
+            }
+            {set_elem {find {elem {find {elem {find $syscfg ui init} 428} component_select_start} 2} exportsongs.btn} 1
+               {`
+                  {ui goto_screen selchannel_screen}
+               }
+            }
+            {func
+               set_graphics
+               {rnd set_sync $vsyncrate}
+               {if $blackbg
+                  {world_panel set_showing FALSE}
+               }
+               {$world iterate PostProc $p
+                  {if {'||' {!= $emulatefps 24} {!= $prevfps $emulatefps}}
+                     {$p set emulate_fps $emulatefps}
+                  }
+                  {set $prevfps $emulatefps}
+                  {unless $scrnoise {$p set noise_intensity 0}}
+                  {unless $mbblend
+                     {$p set motion_blur_blend 0}
+                     {$p set motion_blur_weight 0}
+                  }
+                  {unless $scrbloom {$p set bloom_intensity 0}}
+               }
+               {$world iterate WorldDir $wd
+                  {$wd iterate BandCamShot $bcs
+                     {unless $fxdof
+                        {$bcs set use_depth_of_field FALSE}
+                     }
+                     {unless $camerashake
+                        {foreach_int $i 0 {$bcs size (keyframes)}
+                           {$bcs set (keyframes $i shake_noisefreq) {'*' {$bcs get (keyframes $i shake_noisefreq)} 0}}
+                           {$bcs set (keyframes $i shake_noiseamp) {'*' {$bcs get (keyframes $i shake_noiseamp)} 0}}
+                           {$bcs set (keyframes $i shake_maxangle x) {'*' {$bcs get (keyframes $i shake_maxangle x)} 0}}
+                           {$bcs set (keyframes $i shake_maxangle y) {'*' {$bcs get (keyframes $i shake_maxangle y)} 0}}
+                        }
+                     }
+                  }
+               }
+            }
+            {func
+               set_tp_vars
+               {{$this loaded_dir} set view_time_easy {* {/ {if_else $syncdifspeeds 1.2 2.4} $trackspeed} $speedmod}} ;implement track speed modifier
+               {{$this loaded_dir} set view_time_expert {* {/ 1.2 $trackspeed} $speedmod}}
+            }
+            {func
+               set_song_speed
+               {if {> $speedmod 1}
+                  {if {is_leader_local}
+                     {beatmatch set_music_speed $speedmod}
+                     {session send_msg_to_all
+                        {` 
+                           (beatmatch set_music_speed {, $speedmod}) kNetReliable
+                        }
+                     }
+                  }
+               }
+            }
+            {func
+               enable_second_kick_mapping
+               #ifdef HX_XBOX
+               {insert_elems {find $syscfg beatmatcher controller hx_drums_xbox slots} 1 (kPad_R1 0)}
+               #endif
+               #ifdef HX_PS3
+               {insert_elems {find $syscfg beatmatcher controller hx_drums_ps3 slots} 1 (kPad_R1 0)}
+               #endif
+            }
+            {func
+               disable_second_kick_mapping
+               #ifdef HX_XBOX
+               {set_elem {find $syscfg beatmatcher controller hx_drums_xbox slots} 1 69}
+               #endif
+               #ifdef HX_PS3
+               {set_elem {find $syscfg beatmatcher controller hx_drums_ps3 slots} 1 69}
+               #endif
+            }
+            {push_back {find $syscfg objects OutfitLoader types female category legs outfits}
+               (naked
+                  (genre shell_shop_gothstore)
+                  (cost 0)
+               )
+            }
+            {foreach $tp (82 83) 
+               {push_back {find {elem {find $syscfg ui init} $tp} enter}
+                  {`
+                     {do
+                        {set_graphics}
+                        {set_tp_vars}
+                        {set_song_speed}
+                     }
+                  }
+               }
+            }
+            {set_elem {elem {elem {find {elem {find $syscfg ui init} 87} setup_text} 1} 2} 1
+               {`
+                  {if_else {> $speedmod 1}
+                     {sprint {song_mgr song_name $song} " (" {int {'+' 0.5 {'*' $speedmod 100}}} "%)"}
+                     {song_mgr song_name $song}
+                  }
+               }
+            }
+            {foreach $panel (244 245 246 313 319 376) 
+               {set_elem {find {elem {find $syscfg ui init} $panel} set_results} 1
+                  {`
+                     {heading.lbl set_localized
+                        {if_else {> $speedmod 1}
+                           {sprint {song_mgr song_name {game get_song}} " (" {int {'+' 0.5 {'*' $speedmod 100}}} "%)"}
+                           {song_mgr song_name {game get_song}}
+                        }
+                     }
+                  }
+               }
+            }
+            {foreach $panel (269 270 271 541)
+               {resize {elem {elem {find $syscfg ui init} $panel} 20} 0}
+               {push_back {elem {elem {find $syscfg ui init} $panel} 20} a}
+               {push_back {elem {find $syscfg ui init} $panel}
+                  {`
+                     (BUTTON_DOWN_MSG
+                        {cond
+                           ({$this is_updown $button}
+                              {if {!= {$this get old_list_pos} {ss_song.lst selected_pos}}
+                                 {$this set old_list_pos {ss_song.lst selected_pos}}
+                                 {song_preview ''}
+                              }
+                              kDataUnhandled
+                           )
+                           ({== $button kPad_Tri}
+                              {switch [song_mode]
+                                 (game
+                                    {ui goto_screen
+                                       {if_else {gamemode get skip_matchmaking}
+                                          {gamemode get main_mode_screen}
+                                          {gamemode get matchmaking_screen}
+                                       }
+                                       FALSE
+                                       TRUE
+                                    }
+                                 )
+                                 (practice {ui goto_screen training_menu_screen FALSE TRUE})
+                                 (game_tour
+                                    {{tour performer} set_event
+                                       {{tour event} get event_name}
+                                       {game get leader_num}
+                                    }
+                                    {ui goto_screen
+                                       {if_else {gamemode get is_solo}
+                                          tour_solo_event_screen
+                                          tour_band_event_screen
+                                       }
+                                    }
+                                    kDataUnhandled
+                                 )
+                                 (leaderboards
+                                    {ui goto_screen
+                                       {switch {leaderboards get_type}
+                                          (kPlayerSong leaderboards_seltrack_screen)
+                                          {gamemode get community_screen}
+                                       }
+                                       FALSE
+                                       TRUE
+                                    }
+                                 )
+                                 {fail "Unknown song_mode\n"}
+                              }
+                           )
+                           ({== $button kPad_R1}
+                              {synth play button_toggle}
+                              {$this switch_grouping}
+                           )
+                           ({== $button kPad_DLeft}
+                              {ss_song.lst scroll -5}
+                              {$this component_scroll}
+                              {song_preview ''}
+                           )
+                           ({== $button kPad_DRight}
+                              {ss_song.lst scroll 5}
+                              {$this component_scroll}
+                              {song_preview ''}
+                           )
+                           (TRUE kDataUnhandled)
+                        }
+                     )
+                  }
+               }
+            }
+            {set $patched TRUE}
+         }
+         TRUE
+      }
+   )
+   (tutorial TRUE) ; this game is weird and adds downloaded songs to tour even if they're fake
+   (game_origin rb1_dlc)
+   (song_id 69420)
+   (rating 1)
+   (short_version 121562)
+   (song_length 247272)
+   (extra_authoring lego)
+   (album_art TRUE)
+   (year_released 2003)
+   (album_name "Results May Vary")
+   (album_track_number 7)
+   (base_points 476817)
+)
+#endif

@@ -55,9 +55,9 @@
             {set $scrbloom TRUE}
             {set $camerashake TRUE}
             {set $fxdof TRUE}
-            {set $scrnoise FALSE}
+            {set $scrnoise TRUE}
             {set $mbblend TRUE}
-            {set $emulatefps 60}
+            {set $emulatefps 24}
             {set $trkmuting TRUE}
             {set $whammypb TRUE}
             {set $misssounds TRUE}
@@ -599,10 +599,9 @@
                   {world_panel set_showing FALSE}
                }
                {$world iterate PostProc $p
-                  {if {'||' {!= $emulatefps 24} {!= $prevfps $emulatefps}}
+                  {if {!= $emulatefps 24}
                      {$p set emulate_fps $emulatefps}
                   }
-                  {set $prevfps $emulatefps}
                   {unless $scrnoise {$p set noise_intensity 0}}
                   {unless $mbblend
                      {$p set motion_blur_blend 0}

@@ -86,7 +86,6 @@
             }
             {set_elem {find $syscfg modes defaults min_players} 1 1}
             {set_elem {find $syscfg modes defaults show_loading_images} 1 TRUE}
-            {set_elem {find $syscfg modes defaults can_lose} 1 {` {! $nofail} }}
             {set_elem {find $syscfg modes defaults show_track} 1 {` {! $perfmode} }}
             {set_elem {find $syscfg modes defaults unlock_song_initial_num} 1 3000}
             {set_elem {find $syscfg beatmatcher watcher pitch_bend_range} 1 {` $whammypb }}
@@ -704,7 +703,7 @@
                   (cost 0)
                )
             }
-            {foreach $tp (82 83) 
+            {foreach $tp (82 83)
                {push_back {find {elem {find $syscfg ui init} $tp} enter}
                   {`
                      {do
@@ -712,6 +711,17 @@
                         {set_tp_vars}
                         {set_song_speed}
                      }
+                  }
+               }
+               {push_back {elem {find $syscfg ui init} $tp}
+                  {`
+                     (poll
+                        {if {&& $nofail {! {gamemode get is_tour}}}
+                           {beatmatch foreach_active_player $player
+                              {$player set_crowd_rating 1}
+                           }
+                        }
+                     )
                   }
                }
             }

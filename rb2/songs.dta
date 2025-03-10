@@ -135,6 +135,7 @@
                      {if_else $legacybass "Legacy Bass Streak: ON" "Legacy Bass Streak: OFF"}
                      {if_else $fcring "Show FC Ring: ON" "Show FC Ring: OFF"}
                      {if_else $yourmonies "New Char Max Money: ON" "New Char Max Money: OFF"}
+                     {if_else $songtitle "Song Title Always: ON" "Song Title Always: OFF"}
                      {if_else $autokick "Auto Kick: ON" "Auto Kick: OFF"}
                      {if_else {modifier_mgr is_modifier_active mod_nofail} "No Fail Mode: ON" "No Fail Mode: OFF"}
                      {if_else {modifier_mgr is_modifier_active mod_doublespeed} "Breakneck Speed: ON" "Breakneck Speed: OFF"}
@@ -320,6 +321,9 @@
                         )
                         (("New Char Max Money: ON" "New Char Max Money: OFF")
                            {set $yourmonies {! $yourmonies}}
+                        )
+                        (("Song Title Always: ON" "Song Title Always: OFF")
+                           {set $songtitle {! $songtitle}}
                         )
                         (("Show FC Ring: ON" "Show FC Ring: OFF")
                            {set $fcring {! $fcring}}
@@ -854,6 +858,14 @@
                      (num_gems_combo 0)
                      (num_gems_miss 0)
                      (num_gems_pass 0)
+                  }
+               }
+            }
+            {set_elem {elem {elem {find $syscfg objects RndDir types mtv_overlay intro_end} 1} 3} 2
+               {`
+                  {if_else $songtitle
+                     {fade.anim set_frame 50}
+                     {fade.anim animate}
                   }
                }
             }

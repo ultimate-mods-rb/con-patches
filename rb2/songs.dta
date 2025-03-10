@@ -869,6 +869,24 @@
                   }
                }
             }
+            {set_elem {elem {elem {find $syscfg objects RndDir types mtv_overlay setup_text} 1} 2} 1
+               {`
+                  {if_else {> $speedmod 1}
+                     {sprint {song_mgr song_name $song} " (" {int {'+' 0.5 {'*' $speedmod 100}}} "%)"}
+                     {song_mgr song_name $song}
+                  }
+               }
+            }
+            {set_elem {find {elem {find $syscfg ui init} #ifdef HX_XBOX 251 #else 257 #endif} set_results} 1
+               {`
+                  {heading.lbl set_localized
+                     {if_else {> $speedmod 1}
+                        {sprint {song_mgr song_name {meta_performer completed_song}} " (" {int {'+' 0.5 {'*' $speedmod 100}}} "%)"}
+                        {song_mgr song_name {game get_song}}
+                     }
+                  }
+               }
+            }
             {push_back {find {elem {find $syscfg ui init} 79} on_extend}
                {`
                   {do

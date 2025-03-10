@@ -912,7 +912,7 @@
                   }
                }
             }
-            {foreach $panel #ifdef HX_XBOX (143 165) #else (145 167)
+            {foreach $panel #ifdef HX_XBOX (143 165) #else (145 167) #endif
                {push_back {find {elem {find $syscfg ui init} $panel} enter}
                   {`
                      {unless {== {modifygame.btn get text_token} "Mod Settings"}

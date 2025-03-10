@@ -287,6 +287,7 @@
                   (
                      "Export Songs"
                      {if_else {profile_mgr get_overscan} "Overscan: ON" "Overscan: OFF"}
+                     {if_else $nofastscroll "Disable Fast Scroll: ON" "Disable Fast Scroll: OFF"}
                   )
                }
             }
@@ -377,6 +378,9 @@
                         )
                         (("Overscan: ON" "Overscan: OFF")
                            {profile_mgr set_overscan {! {profile_mgr get_overscan}}}
+                        )
+                        (("Disable Fast Scroll: ON" "Disable Fast Scroll: OFF")
+                           {set $nofastscroll {! $nofastscroll}}
                         )
                      }
                      {switch [menu]
@@ -765,76 +769,23 @@
                }
             }
             {foreach $panel (269 270 271 541)
-               {resize {elem {elem {find $syscfg ui init} $panel} 20} 0}
-               {push_back {elem {elem {find $syscfg ui init} $panel} 20} a}
-               {push_back {elem {find $syscfg ui init} $panel}
-                  {`
-                     (BUTTON_DOWN_MSG
-                        {cond
-                           ({$this is_updown $button}
-                              {if {!= {$this get old_list_pos} {ss_song.lst selected_pos}}
-                                 {$this set old_list_pos {ss_song.lst selected_pos}}
-                                 {song_preview ''}
-                              }
-                              kDataUnhandled
-                           )
-                           ({== $button kPad_Tri}
-                              {switch [song_mode]
-                                 (game
-                                    {ui goto_screen
-                                       {if_else {gamemode get skip_matchmaking}
-                                          {gamemode get main_mode_screen}
-                                          {gamemode get matchmaking_screen}
-                                       }
-                                       FALSE
-                                       TRUE
-                                    }
-                                 )
-                                 (practice {ui goto_screen training_menu_screen FALSE TRUE})
-                                 (game_tour
-                                    {{tour performer} set_event
-                                       {{tour event} get event_name}
-                                       {game get leader_num}
-                                    }
-                                    {ui goto_screen
-                                       {if_else {gamemode get is_solo}
-                                          tour_solo_event_screen
-                                          tour_band_event_screen
-                                       }
-                                    }
-                                    kDataUnhandled
-                                 )
-                                 (leaderboards
-                                    {ui goto_screen
-                                       {switch {leaderboards get_type}
-                                          (kPlayerSong leaderboards_seltrack_screen)
-                                          {gamemode get community_screen}
-                                       }
-                                       FALSE
-                                       TRUE
-                                    }
-                                 )
-                                 {fail "Unknown song_mode\n"}
-                              }
-                           )
-                           ({== $button kPad_R1}
-                              {synth play button_toggle}
-                              {$this switch_grouping}
-                           )
-                           ({== $button kPad_DLeft}
-                              {ss_song.lst scroll -5}
-                              {$this component_scroll}
-                              {song_preview ''}
-                           )
-                           ({== $button kPad_DRight}
-                              {ss_song.lst scroll 5}
-                              {$this component_scroll}
-                              {song_preview ''}
-                           )
-                           (TRUE kDataUnhandled)
+               {insert_elems {elem {find {elem {find $syscfg ui init} $panel} button_down} 2} 3
+                  (
+                     ({== $button kPad_DLeft}
+                        {unless $nofastscroll
+                           {ss_song.lst scroll -5}
+                           {$this component_scroll}
+                           {song_preview ''}
                         }
                      )
-                  }
+                     ({== $button kPad_DRight}
+                        {unless $nofastscroll
+                           {ss_song.lst scroll 5}
+                           {$this component_scroll}
+                           {song_preview ''}
+                        }
+                     )
+                  )
                }
             }
             {foreach $panel (306 374)

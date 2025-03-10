@@ -818,6 +818,25 @@
                   }
                }
             }
+            {foreach $panel (306 374)
+               {resize {find {elem {find $syscfg ui init} $panel} component_scroll} 1}
+            }
+            {resize {find {elem {find $syscfg ui init} 306} update_preview} 1}
+            {insert_elem {find {elem {find $syscfg ui init} 306} component_select_start} 2
+               {`
+                  {$this update_selection}
+               }
+            }
+            {insert_elem {elem {elem {find {elem {find $syscfg ui init} 306} button_down} 2} 1} 2
+               {`
+                  {$this update_selection}
+               }
+            }
+            {insert_elem {elem {elem {elem {find {elem {find $syscfg ui init} 374} button_down} 2} 1} 1} 2 ;XDDDDDDD
+               {`
+                  {$this update_selection}
+               }
+            }
             {set $patched TRUE}
          }
          TRUE

@@ -882,7 +882,7 @@
                   {heading.lbl set_localized
                      {if_else {> $speedmod 1}
                         {sprint {song_mgr song_name {meta_performer completed_song}} " (" {int {'+' 0.5 {'*' $speedmod 100}}} "%)"}
-                        {song_mgr song_name {game get_song}}
+                        {song_mgr song_name {meta_performer completed_song}}
                      }
                   }
                }

@@ -133,6 +133,7 @@
                      {if_else $whammypb "Whammy Pitch Bending: ON" "Whammy Pitch Bending: OFF"}
                      {if_else $trkmuting "Track Muting: ON" "Track Muting: OFF"}
                      {if_else $yourmonies "New Char Max Money: ON" "New Char Max Money: OFF"}
+                     {if_else $songtitle "Song Title Always: ON" "Song Title Always: OFF"}
                      {if_else $nofail "No Fail Mode: ON" "No Fail Mode: OFF"}
                      {if_else $perfmode "Performance Mode: ON" "Performance Mode: OFF"}
                      {if_else $awesome "Awesomeness Detection: ON" "Awesomeness Detection: OFF"}
@@ -314,6 +315,9 @@
                         )
                         (("New Char Max Money: ON" "New Char Max Money: OFF")
                            {set $yourmonies {! $yourmonies}}
+                        )
+                        (("Song Title Always: ON" "Song Title Always: OFF")
+                           {set $songtitle {! $songtitle}}
                         )
                         (("No Fail Mode: ON" "No Fail Mode: OFF")
                            {set $nofail {! $nofail}}
@@ -730,6 +734,21 @@
                   {if_else {> $speedmod 1}
                      {sprint {song_mgr song_name $song} " (" {int {'+' 0.5 {'*' $speedmod 100}}} "%)"}
                      {song_mgr song_name $song}
+                  }
+               }
+            }
+            {set_elem {elem {find {elem {find $syscfg ui init} 87} intro_end} 1} 4
+               {`
+                  {unless $songtitle
+                     {script_task kTaskSeconds (delay 5) (script {$this show_overlay FALSE})}
+                  }
+               }
+            }
+            {set_elem {elem {find {elem {find $syscfg ui init} 87} show_overlay} 3} 2
+               {`
+                  {if_else $songtitle
+                     {fade.anim set_frame 50}
+                     {fade.anim animate}
                   }
                }
             }

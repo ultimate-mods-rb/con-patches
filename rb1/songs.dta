@@ -286,6 +286,7 @@
                {channels.lst set_data
                   (
                      "Export Songs"
+                     "Online Tour"
                      {if_else {profile_mgr get_overscan} "Overscan: ON" "Overscan: OFF"}
                      {if_else $nofastscroll "Disable Fast Scroll: ON" "Disable Fast Scroll: OFF"}
                   )
@@ -375,6 +376,10 @@
                         )
                         ("Export Songs"
                            {ui goto_screen export_initialize_screen}
+                        )
+                        ("Online Tour"
+                           {gamemode set_mode tour_world_online}
+                           {ui goto_screen tour_band_sel_screen}
                         )
                         (("Overscan: ON" "Overscan: OFF")
                            {profile_mgr set_overscan {! {profile_mgr get_overscan}}}

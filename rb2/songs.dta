@@ -634,7 +634,6 @@
                {`
                   {do
                      {set_graphics}
-                     {set_tp_vars}
                      {beatmatch set_kick_autoplay $autokick}
                      {game add_sink $this}
                   }
@@ -887,11 +886,21 @@
                   }
                }
             }
+            {foreach $tp #ifdef HX_XBOX (79 80) #else (78 79) #endif
+               {push_back {elem {find $syscfg ui init} $tp}
+                  {`
+                     (poll
+                        {set_tp_vars}
+                     )
+                  }
+               }
+            }
             {push_back {find {elem {find $syscfg ui init} 79} on_extend}
                {`
                   {do
                      {reset_fc_vars}
                      {set_song_speed}
+                     {set_tp_vars}
                      {if_else {== {gamemode get player_arrangement} kArrangeH2h}
                         {unless {== {{game get_participant_config 0} get_track_sym} vocals}
                            {beatmatch foreach_active_player $player
@@ -976,8 +985,8 @@
             }
             {func
                set_tp_vars
-               {{{get_track_panel} loaded_dir} set view_time_easy {* {/ {if_else $syncdifspeeds 1.2 2.4} $trackspeed} $speedmod}} ;implement track speed modifier
-               {{{get_track_panel} loaded_dir} set view_time_expert {* {/ 1.2 $trackspeed} $speedmod}}
+               {{{get_track_panel} loaded_dir} set view_time_easy {* {/ {if_else $syncdifspeeds 1.2 2.4} $trackspeed} {beatmatch music_speed}}} ;implement track speed modifier
+               {{{get_track_panel} loaded_dir} set view_time_expert {* {/ 1.2 $trackspeed} {beatmatch music_speed}}}
             }
             {func
                set_song_speed

@@ -333,7 +333,13 @@
                         )
                         (("Auto Kick: ON" "Auto Kick: OFF")
                            {set $autokick {! $autokick}}
-                           {modifier_mgr toggle_modifier_active mod_unlockall}
+                           {unless {modifier_mgr is_modifier_unlocked mod_unlockall}
+                              {modifier_mgr unlock_modifier mod_unlockall}
+                           }
+                           {if_else $autokick
+                              {modifier_mgr activate_modifier mod_unlockall}
+                              {modifier_mgr deactivate_modifier mod_unlockall}
+                           }
                         )
                         (("No Fail Mode: ON" "No Fail Mode: OFF")
                            {modifier_mgr toggle_modifier_active mod_nofail}
@@ -348,12 +354,21 @@
                            {modifier_mgr toggle_modifier_active mod_nohud}
                         )
                         (("New Venues Only: ON" "New Venues Only: OFF")
+                           {unless {modifier_mgr is_modifier_unlocked mod_newvenuesonly}
+                              {modifier_mgr unlock_modifier mod_newvenuesonly}
+                           }
                            {modifier_mgr toggle_modifier_active mod_newvenuesonly}
                         )
                         (("Stage Mode: ON" "Stage Mode: OFF")
+                           {unless {modifier_mgr is_modifier_unlocked mod_demomode}
+                              {modifier_mgr unlock_modifier mod_demomode}
+                           }
                            {modifier_mgr toggle_modifier_active mod_demomode}
                         )
                         (("Awesomeness Detection: ON" "Awesomeness Detection: OFF")
+                           {unless {modifier_mgr is_modifier_unlocked mod_awesome}
+                              {modifier_mgr unlock_modifier mod_awesome}
+                           }
                            {modifier_mgr toggle_modifier_active mod_awesome}
                         )
                         ("Speed Settings"
@@ -1010,6 +1025,7 @@
          {set $patched TRUE}
          {passive_messages_panel queue_message " CON Patch by Synchrony loaded successfully!"}
          {passive_messages_panel queue_message " Mod settings can be adjusted in extras"}
+         {passive_messages_panel queue_message " Some scripting uses some elements from RB2/3 Deluxe by MiloHax"}
       }
          TRUE
       }

@@ -974,10 +974,9 @@
                   {world_panel set_showing FALSE}
                }
                {$world iterate PostProc $p
-                  {if {'||' {!= $emulatefps 24} {!= $prevfps $emulatefps}}
+                  {if {!= $emulatefps 24}
                      {$p set emulate_fps $emulatefps}
                   }
-                  {set $prevfps $emulatefps}
                   {unless $scrnoise {$p set noise_intensity 0}}
                   {unless $mbblend
                      {$p set motion_blur_blend 0}
@@ -1008,19 +1007,17 @@
             }
             {func
                set_song_speed
-               {if {> $speedmod 1}
-                  {if {is_leader_local}
-                     {beatmatch set_music_speed $speedmod}
-                     {session send_msg_to_all
-                        {` 
-                           (
-                              {do
-                                 {beatmatch set_music_speed {, $speedmod}}
-                                 {passive_messages_panel queue_message {sprintf " Song speed set to %d%% by host" {int {+ 0.5 {* {, $speedmod} 100}}}}}
-                              }
-                           )
-                           kNetReliable
-                        }
+               {if {&& {> $speedmod 1} {is_leader_local}}
+                  {beatmatch set_music_speed $speedmod}
+                  {session send_msg_to_all
+                     {` 
+                        (
+                           {do
+                              {beatmatch set_music_speed {, $speedmod}}
+                              {passive_messages_panel queue_message {sprintf " Song speed set to %d%% by host" {int {+ 0.5 {* {, $speedmod} 100}}}}}
+                           }
+                        )
+                        kNetReliable
                      }
                   }
                }

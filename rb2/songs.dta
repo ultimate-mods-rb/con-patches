@@ -653,6 +653,7 @@
                {`
                   {do
                      {set_graphics}
+                     {set_tp_vars}
                      {beatmatch set_kick_autoplay $autokick}
                      {game add_sink $this}
                   }
@@ -902,15 +903,6 @@
                         {sprint {song_mgr song_name {meta_performer completed_song}} " (" {int {'+' 0.5 {'*' $speedmod 100}}} "%)"}
                         {song_mgr song_name {meta_performer completed_song}}
                      }
-                  }
-               }
-            }
-            {foreach $tp #ifdef HX_XBOX (79 80) #else (78 79) #endif
-               {push_back {elem {find $syscfg ui init} $tp}
-                  {`
-                     (poll
-                        {set_tp_vars}
-                     )
                   }
                }
             }

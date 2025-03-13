@@ -292,6 +292,7 @@
                {title.lbl set text_token "Other"}
                {channels.lst set_data
                   (
+                     {if_else $noselrsrt "Disable Practice Fast Restart: ON" "Disable Practice Fast Restart: OFF"}
                      {if_else {profile_mgr get_overscan} "Overscan: ON" "Overscan: OFF"}
                   )
                }
@@ -410,6 +411,9 @@
                         ("Other"
                            {set [pos] 0}
                            {set [menu] 5}
+                        )
+                        (("Disable Practice Fast Restart: ON" "Disable Practice Fast Restart: OFF")
+                           {set $noselrsrt {! $noselrsrt}}
                         )
                         (("Overscan: ON" "Overscan: OFF")
                            {profile_mgr set_overscan {! {profile_mgr get_overscan}}}
@@ -933,6 +937,13 @@
                            }
                         }
                      }
+                  }
+               }
+            }
+            {push_back {find {elem {find $syscfg ui init} #ifdef HX_XBOX 588 #else 595 #endif} button_down}
+               {`
+                  {if {&& {== $action kAction_ViewModify} {! $noselrsrt}}
+                     {session end_game kRestart}
                   }
                }
             }

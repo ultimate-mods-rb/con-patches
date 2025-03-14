@@ -84,6 +84,8 @@
             {insert_elems {find $syscfg beatmatcher controller #ifdef HX_XBOX hx_drums_xbox #else hx_drums_ps3 #endif slots} 1 {` ({if_else $secondkick kPad_R1 69} 0) }}
             {set_elem {find $syscfg modes defaults unlock_song_initial_num} 1 3000}
             {set_elem {find $syscfg modes defaults show_loading_images} 1 TRUE}
+            {push_back {find $syscfg modes jukebox} (show_loading_images FALSE)} ; causes the game to crash on load most of the time
+            {set_elem {find $syscfg modes jukebox force_player_vocal_gender} 1 FALSE}
             {set_elem {find $syscfg beatmatcher watcher pitch_bend_range} 1 {` $whammypb }}
             {set_elem {find $syscfg beatmatcher audio mute_volume} 1 {` {if_else $trkmuting -96.0 -0.001} }}
             {set_elem {find $syscfg sound slider} 1 -96}
@@ -942,14 +944,35 @@
                {push_back {find {elem {find $syscfg ui init} $panel} enter}
                   {`
                      {unless {== {modifygame.btn get text_token} "Mod Settings"}
-                        {modifygame.btn set text_token "Mod Settings"}
+                        {do
+                           {modifygame.btn set text_token "Mod Settings"}
+                           {webcode_ps3.btn set text_token extra_jukebox}
+                        }
                      }
+                  }
+               }
+            }
+            {push_back {find {elem {find $syscfg ui init} #ifdef HX_XBOX 165 #else 167 #endif} enter}
+               {`
+                  {do
+                     {$this enable webcode_ps3.btn}
+                     {webcode_ps3.btn set_showing TRUE}
                   }
                }
             }
             {set_elem {find {elem {find {elem {find $syscfg ui init} #ifdef HX_XBOX 165 #else 167 #endif} component_select} 2} modifygame.btn} 1
                {`
                   {ui goto_screen selchannel_screen}
+               }
+            }
+            {set_elem {find {elem {find {elem {find $syscfg ui init} #ifdef HX_XBOX 165 #else 167 #endif} component_select} 2} webcode_ps3.btn} 1
+               {`
+                  {do
+                     {gamemode set_mode jukebox $player_num}
+                     {char_cache cache_update}
+                     {$this wait_for_session_ready}
+                     {session_mgr add_local_user $player}
+                  }
                }
             }
             {push_back {find {elem {find $syscfg ui init} #ifdef HX_XBOX 85 #else 84 #endif} finish_load}

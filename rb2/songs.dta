@@ -652,7 +652,6 @@
             {set_elem {find {elem {find $syscfg ui init} 79} enter} 1
                {`
                   {do
-                     {set_graphics}
                      {set_tp_vars}
                      {beatmatch set_kick_autoplay $autokick}
                      {game add_sink $this}
@@ -953,6 +952,42 @@
                   {ui goto_screen selchannel_screen}
                }
             }
+            {push_back {find {elem {find $syscfg ui init} #ifdef HX_XBOX 85 #else 84 #endif} finish_load}
+               {`
+                  {do
+                     {rnd set_sync $vsyncrate}
+                     {if $blackbg
+                        {$this set_showing FALSE}
+                     }
+                     {$world iterate PostProc $p
+                        {if {!= $emulatefps 24}
+                           {$p set emulate_fps $emulatefps}
+                        }
+                        {unless $scrnoise {$p set noise_intensity 0}}
+                        {unless $mbblend
+                           {$p set motion_blur_blend 0}
+                           {$p set motion_blur_weight 0}
+                        }
+                        {unless $scrbloom {$p set bloom_intensity 0}}
+                     }
+                     {$world iterate WorldDir $wd
+                        {$wd iterate BandCamShot $bcs
+                           {unless $fxdof
+                              {$bcs set use_depth_of_field FALSE}
+                           }
+                           {unless $camerashake
+                              {foreach_int $i 0 {$bcs size (keyframes)}
+                                 {$bcs set (keyframes $i shake_noisefreq) {'*' {$bcs get (keyframes $i shake_noisefreq)} 0}}
+                                 {$bcs set (keyframes $i shake_noiseamp) {'*' {$bcs get (keyframes $i shake_noiseamp)} 0}}
+                                 {$bcs set (keyframes $i shake_maxangle x) {'*' {$bcs get (keyframes $i shake_maxangle x)} 0}}
+                                 {$bcs set (keyframes $i shake_maxangle y) {'*' {$bcs get (keyframes $i shake_maxangle y)} 0}}
+                              }
+                           }
+                        }
+                     }
+                  }
+               }
+            }
             ; start of funcs
             {func
                reset_fc_vars
@@ -967,39 +1002,6 @@
                }
             }
             {set_pad_map}
-            {func
-               set_graphics
-               {rnd set_sync $vsyncrate}
-               {if $blackbg
-                  {world_panel set_showing FALSE}
-               }
-               {$world iterate PostProc $p
-                  {if {!= $emulatefps 24}
-                     {$p set emulate_fps $emulatefps}
-                  }
-                  {unless $scrnoise {$p set noise_intensity 0}}
-                  {unless $mbblend
-                     {$p set motion_blur_blend 0}
-                     {$p set motion_blur_weight 0}
-                  }
-                  {unless $scrbloom {$p set bloom_intensity 0}}
-               }
-               {$world iterate WorldDir $wd
-                  {$wd iterate BandCamShot $bcs
-                     {unless $fxdof
-                        {$bcs set use_depth_of_field FALSE}
-                     }
-                     {unless $camerashake
-                        {foreach_int $i 0 {$bcs size (keyframes)}
-                           {$bcs set (keyframes $i shake_noisefreq) {'*' {$bcs get (keyframes $i shake_noisefreq)} 0}}
-                           {$bcs set (keyframes $i shake_noiseamp) {'*' {$bcs get (keyframes $i shake_noiseamp)} 0}}
-                           {$bcs set (keyframes $i shake_maxangle x) {'*' {$bcs get (keyframes $i shake_maxangle x)} 0}}
-                           {$bcs set (keyframes $i shake_maxangle y) {'*' {$bcs get (keyframes $i shake_maxangle y)} 0}}
-                        }
-                     }
-                  }
-               }
-            }
             {func
                set_tp_vars
                {{{get_track_panel} loaded_dir} set view_time_easy {* {/ {if_else $syncdifspeeds 1.2 2.4} $trackspeed} {beatmatch music_speed}}} ;implement track speed modifier

@@ -975,6 +975,32 @@
                   }
                }
             }
+            {push_back {elem {find $syscfg ui init} #ifdef HX_XBOX 720 #else 728 #endif}
+               {`
+                  (BUTTON_UP_MSG
+                     {switch
+                        $raw_button
+                        (kPad_L1
+                           {beatmatch jump
+                              {- {beatmatch get_song_ms} 10000.0}
+                           }
+                        )
+                        (kPad_R1
+                           {beatmatch jump
+                              {+ {beatmatch get_song_ms} 10000.0}
+                           }
+                        )
+                        (kPad_Square
+                           {cycle_free_camera}
+                        )
+                        (kPad_Tri
+                           {toggle_time_paused}
+                        )
+                        kDataUnhandled
+                     }
+                  )
+               }
+            }
             {push_back {find {elem {find $syscfg ui init} #ifdef HX_XBOX 85 #else 84 #endif} finish_load}
                {`
                   {do

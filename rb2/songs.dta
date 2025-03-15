@@ -47,8 +47,27 @@
    (downloaded
       {do
          {unless $patched
+            {set $is_xbox #ifdef HX_XBOX TRUE #else FALSE #endif}
+            {unless {== {elem {find $syscfg system language force} 1} eng}
+               {set $eur TRUE}
+            }
+            {func plat_offset
+               ($var $xbox_off $xbox_eur_off)
+               {cond
+                  ({&& $is_xbox $eur}
+                     {+ $var $xbox_eur_off}
+                  )
+                  ({&& $is_xbox {! $eur}}
+                     {+ $var $xbox_off}
+                  )
+                  ({&& {! $is_xbox} $eur}
+                     {+ $var 1}
+                  )
+                  $var
+               }
+            }
             ;start of init vars
-            {set $modpanel #ifdef HX_XBOX 228 #else 234 #endif}
+            {set $modpanel {plat_offset 234 -6 -3}}
             {set $trackspeed 1.0}
             {set $speedmod 1.0}
             {set $hwlength 1.0} ; awesomeness actually
@@ -667,7 +686,7 @@
                }
             }
             ; don't ever touch anything here. it will break very fast.
-            {set_elem {find {elem {find $syscfg ui init} 79} enter} 1
+            {set_elem {find {elem {find $syscfg ui init} {plat_offset 79 0 1}} enter} 1
                {`
                   {do
                      {set_tp_vars}
@@ -676,7 +695,7 @@
                   }
                }
             }
-            {push_back {find {elem {find $syscfg ui init} 79} enter}
+            {push_back {find {elem {find $syscfg ui init} {plat_offset 79 0 1}} enter}
                {unless {exists fc_bass_callback}
                   {new Object fc_bass_callback ;remove FC groove on bass miss/pass
                      (hit
@@ -897,33 +916,7 @@
                   }
                }
             }
-            {set_elem {elem {elem {find $syscfg objects RndDir types mtv_overlay intro_end} 1} 3} 2
-               {`
-                  {if_else $songtitle
-                     {fade.anim set_frame 50}
-                     {fade.anim animate}
-                  }
-               }
-            }
-            {set_elem {elem {elem {find $syscfg objects RndDir types mtv_overlay setup_text} 1} 2} 1
-               {`
-                  {if_else {> $speedmod 1}
-                     {sprint {song_mgr song_name $song} " (" {int {'+' 0.5 {'*' $speedmod 100}}} "%)"}
-                     {song_mgr song_name $song}
-                  }
-               }
-            }
-            {set_elem {find {elem {find $syscfg ui init} #ifdef HX_XBOX 251 #else 257 #endif} set_results} 1
-               {`
-                  {heading.lbl set_localized
-                     {if_else {> $speedmod 1}
-                        {sprint {song_mgr song_name {meta_performer completed_song}} " (" {int {'+' 0.5 {'*' $speedmod 100}}} "%)"}
-                        {song_mgr song_name {meta_performer completed_song}}
-                     }
-                  }
-               }
-            }
-            {push_back {find {elem {find $syscfg ui init} 79} on_extend}
+            {push_back {find {elem {find $syscfg ui init} {plat_offset 79 0 1}} on_extend}
                {`
                   {do
                      {reset_fc_vars}
@@ -949,14 +942,40 @@
                   }
                }
             }
-            {push_back {find {elem {find $syscfg ui init} #ifdef HX_XBOX 588 #else 595 #endif} button_down}
+            {set_elem {elem {elem {find $syscfg objects RndDir types mtv_overlay intro_end} 1} 3} 2
+               {`
+                  {if_else $songtitle
+                     {fade.anim set_frame 50}
+                     {fade.anim animate}
+                  }
+               }
+            }
+            {set_elem {elem {elem {find $syscfg objects RndDir types mtv_overlay setup_text} 1} 2} 1
+               {`
+                  {if_else {> $speedmod 1}
+                     {sprint {song_mgr song_name $song} " (" {int {'+' 0.5 {'*' $speedmod 100}}} "%)"}
+                     {song_mgr song_name $song}
+                  }
+               }
+            }
+            {set_elem {find {elem {find $syscfg ui init} {plat_offset 257 -6 -3}} set_results} 1
+               {`
+                  {heading.lbl set_localized
+                     {if_else {> $speedmod 1}
+                        {sprint {song_mgr song_name {meta_performer completed_song}} " (" {int {'+' 0.5 {'*' $speedmod 100}}} "%)"}
+                        {song_mgr song_name {meta_performer completed_song}}
+                     }
+                  }
+               }
+            }
+            {push_back {find {elem {find $syscfg ui init} {plat_offset 595 -7 -3}} button_down}
                {`
                   {if {&& {== $action kAction_ViewModify} {! $noselrsrt}}
                      {session end_game kRestart}
                   }
                }
             }
-            {foreach $panel #ifdef HX_XBOX (143 165) #else (145 167) #endif
+            {foreach $panel ({plat_offset 145 -2 1} {plat_offset 167 -2 1})
                {push_back {find {elem {find $syscfg ui init} $panel} enter}
                   {`
                      {unless {== {modifygame.btn get text_token} "Mod Settings"}
@@ -968,7 +987,7 @@
                   }
                }
             }
-            {push_back {find {elem {find $syscfg ui init} #ifdef HX_XBOX 165 #else 167 #endif} enter}
+            {push_back {find {elem {find $syscfg ui init} {plat_offset 167 -2 1}} enter}
                {`
                   {do
                      {$this enable webcode_ps3.btn}
@@ -976,12 +995,12 @@
                   }
                }
             }
-            {set_elem {find {elem {find {elem {find $syscfg ui init} #ifdef HX_XBOX 165 #else 167 #endif} component_select} 2} modifygame.btn} 1
+            {set_elem {find {elem {find {elem {find $syscfg ui init} {plat_offset 167 -2 1}} component_select} 2} modifygame.btn} 1
                {`
                   {ui goto_screen selchannel_screen}
                }
             }
-            {set_elem {find {elem {find {elem {find $syscfg ui init} #ifdef HX_XBOX 165 #else 167 #endif} component_select} 2} webcode_ps3.btn} 1
+            {set_elem {find {elem {find {elem {find $syscfg ui init} {plat_offset 167 -2 1}} component_select} 2} webcode_ps3.btn} 1
                {`
                   {do
                      {gamemode set_mode jukebox $player_num}
@@ -991,7 +1010,7 @@
                   }
                }
             }
-            {push_back {elem {find $syscfg ui init} #ifdef HX_XBOX 720 #else 728 #endif}
+            {push_back {elem {find $syscfg ui init} {plat_offset 728 -8 -4}}
                {`
                   (BUTTON_UP_MSG
                      {switch
@@ -1017,7 +1036,7 @@
                   )
                }
             }
-            {push_back {find {elem {find $syscfg ui init} #ifdef HX_XBOX 85 #else 84 #endif} finish_load}
+            {push_back {find {elem {find $syscfg ui init} {plat_offset 84 1 2}} finish_load}
                {`
                   {do
                      {rnd set_sync $vsyncrate}

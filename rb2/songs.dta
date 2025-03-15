@@ -360,7 +360,7 @@
                         (("Auto Kick: ON" "Auto Kick: OFF")
                            {set $autokick {! $autokick}}
                            {unless {modifier_mgr is_modifier_unlocked mod_unlockall}
-                              {modifier_mgr unlock_modifier mod_unlockall}
+                              {modifier_mgr unlock_modifier mod_unlockall $player_num}
                            }
                            {if_else $autokick
                               {modifier_mgr activate_modifier mod_unlockall}
@@ -381,13 +381,13 @@
                         )
                         (("New Venues Only: ON" "New Venues Only: OFF")
                            {unless {modifier_mgr is_modifier_unlocked mod_newvenuesonly}
-                              {modifier_mgr unlock_modifier mod_newvenuesonly}
+                              {modifier_mgr unlock_modifier mod_newvenuesonly $player_num}
                            }
                            {modifier_mgr toggle_modifier_active mod_newvenuesonly}
                         )
                         (("Stage Mode: ON" "Stage Mode: OFF")
                            {unless {modifier_mgr is_modifier_unlocked mod_demomode}
-                              {modifier_mgr unlock_modifier mod_demomode}
+                              {modifier_mgr unlock_modifier mod_demomode $player_num}
                            }
                            {modifier_mgr toggle_modifier_active mod_demomode}
                         )
@@ -405,7 +405,7 @@
                         )
                         (("Awesomeness Detection: ON" "Awesomeness Detection: OFF")
                            {unless {modifier_mgr is_modifier_unlocked mod_awesome}
-                              {modifier_mgr unlock_modifier mod_awesome}
+                              {modifier_mgr unlock_modifier mod_awesome $player_num}
                            }
                            {modifier_mgr toggle_modifier_active mod_awesome}
                         )

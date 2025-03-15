@@ -145,6 +145,10 @@
                      {if_else {modifier_mgr is_modifier_active mod_nohud} "Performance Mode: ON" "Performance Mode: OFF"}
                      {if_else {modifier_mgr is_modifier_active mod_newvenuesonly} "New Venues Only: ON" "New Venues Only: OFF"}
                      {if_else {modifier_mgr is_modifier_active mod_demomode} "Stage Mode: ON" "Stage Mode: OFF"}
+                     {if_else $bigmode "Big Mode: ON" "Big Mode: OFF"}
+                     {if_else $smallworld "Small World: ON" "Small World: OFF"}
+                     {if_else $greennday "Green Day: ON" "Green Day: OFF"}
+                     {if_else $hide_chars "Hide Chars: ON" "Hide Chars: OFF"}
                      {if_else {modifier_mgr is_modifier_active mod_awesome} "Awesomeness Detection: ON" "Awesomeness Detection: OFF"}
                   )
                }
@@ -367,6 +371,18 @@
                               {modifier_mgr unlock_modifier mod_demomode}
                            }
                            {modifier_mgr toggle_modifier_active mod_demomode}
+                        )
+                        (("Big Mode: ON" "Big Mode: OFF")
+                           {set $bigmode {! $bigmode}}
+                        )
+                        (("Small World: ON" "Small World: OFF")
+                           {set $smallworld {! $smallworld}}
+                        )
+                        (("Green Day: ON" "Green Day: OFF")
+                           {set $greennday {! $greennday}}
+                        )
+                        (("Hide Chars: ON" "Hide Chars: OFF")
+                           {set $hide_chars {! $hide_chars}}
                         )
                         (("Awesomeness Detection: ON" "Awesomeness Detection: OFF")
                            {unless {modifier_mgr is_modifier_unlocked mod_awesome}
@@ -1030,6 +1046,50 @@
                                  {$bcs set (keyframes $i shake_noiseamp) {'*' {$bcs get (keyframes $i shake_noiseamp)} 0}}
                                  {$bcs set (keyframes $i shake_maxangle x) {'*' {$bcs get (keyframes $i shake_maxangle x)} 0}}
                                  {$bcs set (keyframes $i shake_maxangle y) {'*' {$bcs get (keyframes $i shake_maxangle y)} 0}}
+                              }
+                           }
+                        }
+                        {if $greennday
+                           {$wd iterate Mat $m
+                              {$m set intensify 1}
+                              {$m set color {pack_color 0 1 0}}
+                           }
+                        }
+                        {if $smallworld
+                           {$wd iterate Mesh $m
+                              {$m set_local_scale 0.5 0.5 0.5}
+                           }
+                        }
+                     }
+                     {$world iterate Character $c
+                        {if $greennday
+                           {$c iterate Mat $m
+                              {$m set intensify 1}
+                              {$m set color {pack_color 0 1 0}}
+                           }
+                        }
+                        {if $bigmode
+                           {$c iterate Mesh $m
+                              {$m set_local_scale 2 2 2}
+                           }
+                        }
+                     }
+                     {$world iterate CompositeCharacter $cc
+                        {if {modifier_mgr is_modifier_active mod_awesome}
+                           {$cc iterate Mat $m
+                              {if {== $m legs_skin.mat}
+                                 {$m set diffuse_tex {{load_objects char/male/outfits/static_naked_textures} find legs_naked_diffuse.tex}}
+                                 {$m set specular_map {{load_objects char/male/outfits/static_naked_textures} find legs_naked_spec.tex}}
+                              }
+                           }
+                        }
+                        {$cc iterate Mesh $m
+                           {if $hide_chars
+                              {$m set_showing FALSE}
+                           }
+                           {if {modifier_mgr is_modifier_active mod_awesome}
+                              {if {&& {has_substr {sprint $m} "bikinic"} {<= {strlen {sprint $m}} 22}}
+                                 {$m set_showing FALSE}
                               }
                            }
                         }

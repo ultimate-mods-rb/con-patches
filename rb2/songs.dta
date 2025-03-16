@@ -108,7 +108,6 @@
             {set_elem {find $syscfg beatmatcher watcher pitch_bend_range} 1 {` $whammypb }}
             {set_elem {find $syscfg beatmatcher audio mute_volume} 1 {` {if_else $trkmuting -96.0 -0.001} }}
             {set_elem {find $syscfg sound slider} 1 -96}
-            {set_elem {find $syscfg tour default_money} 1 {` {if_else $yourmonies 999999999 100} }}
             {set_elem {find $syscfg tour default_difficulty} 1 kDifficultyExpert}
             {foreach_int $char 1 100
                {push_back {elem {find $syscfg characters prefab} $char} (selectable TRUE)}
@@ -155,7 +154,7 @@
                      {if_else $trkmuting "Track Muting: ON" "Track Muting: OFF"}
                      {if_else $legacybass "Legacy Bass Streak: ON" "Legacy Bass Streak: OFF"}
                      {if_else $fcring "Show FC Ring: ON" "Show FC Ring: OFF"}
-                     {if_else $yourmonies "New Char Max Money: ON" "New Char Max Money: OFF"}
+                     {if_else $yourmonies "Infinite Money: ON" "Infinite Money: OFF"}
                      {if_else $songtitle "Song Title Always: ON" "Song Title Always: OFF"}
                      {if_else $autokick "Auto Kick: ON" "Auto Kick: OFF"}
                      {if_else {modifier_mgr is_modifier_active mod_nofail} "No Fail Mode: ON" "No Fail Mode: OFF"}
@@ -345,7 +344,7 @@
                         (("Track Muting: ON" "Track Muting: OFF")
                            {set $trkmuting {! $trkmuting}}
                         )
-                        (("New Char Max Money: ON" "New Char Max Money: OFF")
+                        (("Infinite Money: ON" "Infinite Money: OFF")
                            {set $yourmonies {! $yourmonies}}
                         )
                         (("Song Title Always: ON" "Song Title Always: OFF")
@@ -1112,6 +1111,17 @@
                               }
                            }
                         }
+                     }
+                  }
+               }
+            }
+            {push_back {find {elem {find $syscfg ui init} {plat_offset 599 -7 -3}} enter}
+               {`
+                  {if $yourmonies
+                     {do
+                        ($user {input_mgr get_user})
+                        ($char {$user get_char})
+                        {$char set_money 999999999}
                      }
                   }
                }

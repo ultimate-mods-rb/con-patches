@@ -79,7 +79,6 @@
             {set $emulatefps 24}
             {set $trkmuting TRUE}
             {set $whammypb TRUE}
-            {set $misssounds TRUE}
             {set $fcring TRUE}
             {set $vsyncrate 1}
             {set $pad_inst 1}
@@ -109,6 +108,7 @@
             {set_elem {find $syscfg beatmatcher audio mute_volume} 1 {` {if_else $trkmuting -96.0 -0.001} }}
             {set_elem {find $syscfg sound slider} 1 -96}
             {set_elem {find $syscfg tour default_difficulty} 1 kDifficultyExpert}
+            {set_elem {elem {find $syscfg player handlers miss} 2} 2 {` {unless $nomisounds {play_game_seq_player $seq $seq $user}} }}
             {foreach_int $char 1 100
                {push_back {elem {find $syscfg characters prefab} $char} (selectable TRUE)}
             }
@@ -152,6 +152,7 @@
                   (
                      {if_else $whammypb "Whammy Pitch Bending: ON" "Whammy Pitch Bending: OFF"}
                      {if_else $trkmuting "Track Muting: ON" "Track Muting: OFF"}
+                     {if_else $nomisounds "Disable Miss Sounds: ON" "Disable Miss Sounds: OFF"}
                      {if_else $legacybass "Legacy Bass Streak: ON" "Legacy Bass Streak: OFF"}
                      {if_else $fcring "Show FC Ring: ON" "Show FC Ring: OFF"}
                      {if_else $yourmonies "Infinite Money: ON" "Infinite Money: OFF"}
@@ -343,6 +344,9 @@
                         )
                         (("Track Muting: ON" "Track Muting: OFF")
                            {set $trkmuting {! $trkmuting}}
+                        )
+                        (("Disable Miss Sounds: ON" "Disable Miss Sounds: OFF")
+                           {set $nomisounds {! $nomisounds}}
                         )
                         (("Infinite Money: ON" "Infinite Money: OFF")
                            {set $yourmonies {! $yourmonies}}

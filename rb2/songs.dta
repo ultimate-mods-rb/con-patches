@@ -1142,8 +1142,8 @@
             {set_pad_map}
             {func
                set_tp_vars
-               {{{get_track_panel} loaded_dir} set view_time_easy {* {/ {if_else $syncdifspeeds 1.2 2.4} $trackspeed} {beatmatch music_speed}}} ;implement track speed modifier
-               {{{get_track_panel} loaded_dir} set view_time_expert {* {/ 1.2 $trackspeed} {beatmatch music_speed}}}
+               {{{get_track_panel} loaded_dir} set view_time_easy {* {/ {if_else $syncdifspeeds 1.2 2.4} $trackspeed} $speedmod}} ;implement track speed modifier
+               {{{get_track_panel} loaded_dir} set view_time_expert {* {/ 1.2 $trackspeed} $speedmod}}
             }
             {func
                set_song_speed

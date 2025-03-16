@@ -293,6 +293,7 @@
                      "Online Tour"
                      {if_else {profile_mgr get_overscan} "Overscan: ON" "Overscan: OFF"}
                      {if_else $nofastscroll "Disable Fast Scroll: ON" "Disable Fast Scroll: OFF"}
+                     {if_else $noselrsrt "Disable Practice Fast Restart: ON" "Disable Practice Fast Restart: OFF"}
                   )
                }
             }
@@ -405,6 +406,9 @@
                         )
                         (("Disable Fast Scroll: ON" "Disable Fast Scroll: OFF")
                            {set $nofastscroll {! $nofastscroll}}
+                        )
+                        (("Disable Practice Fast Restart: ON" "Disable Practice Fast Restart: OFF")
+                           {set $noselrsrt {! $noselrsrt}}
                         )
                      }
                      {switch [menu]
@@ -875,6 +879,13 @@
             {insert_elem {elem {elem {elem {find {elem {find $syscfg ui init} 374} button_down} 2} 1} 1} 2 ;XDDDDDDD
                {`
                   {$this update_selection}
+               }
+            }
+            {push_back {find {elem {find $syscfg ui init} 553} button_down}
+               {`
+                  {if {&& {== $button kPad_Select} {! $noselrsrt}}
+                     {session end_game kRestart}
+                  }
                }
             }
             {push_back {find {elem {find $syscfg ui init} 560} enter}

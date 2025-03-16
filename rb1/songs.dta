@@ -92,7 +92,6 @@
             {set_elem {find $syscfg beatmatcher audio mute_volume} 1 {` {if_else $trkmuting -96.0 -0.001} }}
             {set_elem {find $syscfg sound slider} 1 -96}
             {set_elem {find $syscfg tour solo default_difficulty} 1 kDifficultyExpert}
-            {set_elem {find $syscfg tour default_money} 1 {` {if_else $yourmonies 999999999 100} }}
 
             ;small example script of how to find elems. crashes the game as there are not 1000 elems but works.
             ;{foreach $num
@@ -132,7 +131,7 @@
                   (
                      {if_else $whammypb "Whammy Pitch Bending: ON" "Whammy Pitch Bending: OFF"}
                      {if_else $trkmuting "Track Muting: ON" "Track Muting: OFF"}
-                     {if_else $yourmonies "New Char Max Money: ON" "New Char Max Money: OFF"}
+                     {if_else $yourmonies "Infinite Money: ON" "Infinite Money: OFF"}
                      {if_else $songtitle "Song Title Always: ON" "Song Title Always: OFF"}
                      {if_else $nofail "No Fail Mode: ON" "No Fail Mode: OFF"}
                      {if_else $perfmode "Performance Mode: ON" "Performance Mode: OFF"}
@@ -315,7 +314,7 @@
                         (("Track Muting: ON" "Track Muting: OFF")
                            {set $trkmuting {! $trkmuting}}
                         )
-                        (("New Char Max Money: ON" "New Char Max Money: OFF")
+                        (("Infinite Money: ON" "Infinite Money: OFF")
                            {set $yourmonies {! $yourmonies}}
                         )
                         (("Song Title Always: ON" "Song Title Always: OFF")
@@ -810,6 +809,18 @@
             {insert_elem {elem {elem {elem {find {elem {find $syscfg ui init} 374} button_down} 2} 1} 1} 2 ;XDDDDDDD
                {`
                   {$this update_selection}
+               }
+            }
+            {push_back {find {elem {find $syscfg ui init} 560} enter}
+               {`
+                  {if $yourmonies
+                     {do
+                        ($char
+                           {{game get_player_config {shop_char_panel get char_player_num}} get_char}
+                        )
+                        {$char set_money 999999999}
+                     }
+                  }
                }
             }
             {set $patched TRUE}

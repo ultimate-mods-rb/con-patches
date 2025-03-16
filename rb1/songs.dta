@@ -135,6 +135,10 @@
                      {if_else $songtitle "Song Title Always: ON" "Song Title Always: OFF"}
                      {if_else $nofail "No Fail Mode: ON" "No Fail Mode: OFF"}
                      {if_else $perfmode "Performance Mode: ON" "Performance Mode: OFF"}
+                     {if_else $bigmode "Big Mode: ON" "Big Mode: OFF"}
+                     {if_else $smallworld "Small World: ON" "Small World: OFF"}
+                     {if_else $greennday "Green Day: ON" "Green Day: OFF"}
+                     {if_else $hide_chars "Hide Chars: ON" "Hide Chars: OFF"}
                      {if_else $awesome "Awesomeness Detection: ON" "Awesomeness Detection: OFF"}
                   )
                }
@@ -325,6 +329,18 @@
                         )
                         (("Performance Mode: ON" "Performance Mode: OFF")
                            {set $perfmode {! $perfmode}}
+                        )
+                        (("Big Mode: ON" "Big Mode: OFF")
+                           {set $bigmode {! $bigmode}}
+                        )
+                        (("Small World: ON" "Small World: OFF")
+                           {set $smallworld {! $smallworld}}
+                        )
+                        (("Green Day: ON" "Green Day: OFF")
+                           {set $greennday {! $greennday}}
+                        )
+                        (("Hide Chars: ON" "Hide Chars: OFF")
+                           {set $hide_chars {! $hide_chars}}
                         )
                         (("Awesomeness Detection: ON" "Awesomeness Detection: OFF")
                            {set $awesome {! $awesome}}
@@ -641,39 +657,6 @@
             }
             {set_pad_map}
             {func
-               set_graphics
-               {rnd set_sync $vsyncrate}
-               {if $blackbg
-                  {world_panel set_showing FALSE}
-               }
-               {$world iterate PostProc $p
-                  {if {!= $emulatefps 24}
-                     {$p set emulate_fps $emulatefps}
-                  }
-                  {unless $scrnoise {$p set noise_intensity 0}}
-                  {unless $mbblend
-                     {$p set motion_blur_blend 0}
-                     {$p set motion_blur_weight 0}
-                  }
-                  {unless $scrbloom {$p set bloom_intensity 0}}
-               }
-               {$world iterate WorldDir $wd
-                  {$wd iterate BandCamShot $bcs
-                     {unless $fxdof
-                        {$bcs set use_depth_of_field FALSE}
-                     }
-                     {unless $camerashake
-                        {foreach_int $i 0 {$bcs size (keyframes)}
-                           {$bcs set (keyframes $i shake_noisefreq) {'*' {$bcs get (keyframes $i shake_noisefreq)} 0}}
-                           {$bcs set (keyframes $i shake_noiseamp) {'*' {$bcs get (keyframes $i shake_noiseamp)} 0}}
-                           {$bcs set (keyframes $i shake_maxangle x) {'*' {$bcs get (keyframes $i shake_maxangle x)} 0}}
-                           {$bcs set (keyframes $i shake_maxangle y) {'*' {$bcs get (keyframes $i shake_maxangle y)} 0}}
-                        }
-                     }
-                  }
-               }
-            }
-            {func
                set_tp_vars
                {{$this loaded_dir} set view_time_easy {* {/ {if_else $syncdifspeeds 1.2 2.4} $trackspeed} $speedmod}} ;implement track speed modifier
                {{$this loaded_dir} set view_time_expert {* {/ 1.2 $trackspeed} $speedmod}}
@@ -757,6 +740,86 @@
                   {if_else $songtitle
                      {fade.anim set_frame 50}
                      {fade.anim animate}
+                  }
+               }
+            }
+            {push_back {find {elem {find $syscfg ui init} 89} finish_load}
+               {`
+                  {do
+                     {rnd set_sync $vsyncrate}
+                     {if $blackbg
+                        {$this set_showing FALSE}
+                     }
+                     {$world iterate PostProc $p
+                        {if {!= $emulatefps 24}
+                           {$p set emulate_fps $emulatefps}
+                        }
+                        {unless $scrnoise {$p set noise_intensity 0}}
+                        {unless $mbblend
+                           {$p set motion_blur_blend 0}
+                           {$p set motion_blur_weight 0}
+                        }
+                        {unless $scrbloom {$p set bloom_intensity 0}}
+                     }
+                     {$world iterate WorldDir $wd
+                        {$wd iterate BandCamShot $bcs
+                           {unless $fxdof
+                              {$bcs set use_depth_of_field FALSE}
+                           }
+                           {unless $camerashake
+                              {foreach_int $i 0 {$bcs size (keyframes)}
+                                 {$bcs set (keyframes $i shake_noisefreq) {'*' {$bcs get (keyframes $i shake_noisefreq)} 0}}
+                                 {$bcs set (keyframes $i shake_noiseamp) {'*' {$bcs get (keyframes $i shake_noiseamp)} 0}}
+                                 {$bcs set (keyframes $i shake_maxangle x) {'*' {$bcs get (keyframes $i shake_maxangle x)} 0}}
+                                 {$bcs set (keyframes $i shake_maxangle y) {'*' {$bcs get (keyframes $i shake_maxangle y)} 0}}
+                              }
+                           }
+                        }
+                        {if $greennday
+                           {$wd iterate Mat $m
+                              {$m set intensify 1}
+                              {$m set color {pack_color 0 1 0}}
+                           }
+                        }
+                        {if $smallworld
+                           {$wd iterate Mesh $m
+                              {$m set_local_scale 0.5 0.5 0.5}
+                           }
+                        }
+                     }
+                     {$world iterate Character $c
+                        {if $greennday
+                           {$c iterate Mat $m
+                              {$m set intensify 1}
+                              {$m set color {pack_color 0 1 0}}
+                           }
+                        }
+                        {if $bigmode
+                           {$c iterate Mesh $m
+                              {$m set_local_scale 2 2 2}
+                           }
+                        }
+                     }
+                     {$world iterate CompositeCharacter $cc
+                        {if $awesome
+                           {$cc iterate Mat $m
+                              {if {== $m legs_skin.mat}
+                                 {$m set diffuse_tex {{load_objects char/male/outfits/static_naked_textures} find legs_naked_diffuse.tex}}
+                                 {$m set specular_map {{load_objects char/male/outfits/static_naked_textures} find legs_naked_spec.tex}}
+                              }
+                           }
+                        }
+                        {$cc iterate Mesh $m
+                           {if $hide_chars
+                              {$m set_showing FALSE}
+                           }
+                           {if $awesome
+                              {if {&& {has_substr {sprint $m} "bikinic"} {<= {strlen {sprint $m}} 22}}
+                                 {$m set_showing FALSE}
+                              }
+                           }
+                        }
+                     }
                   }
                }
             }

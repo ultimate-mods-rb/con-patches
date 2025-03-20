@@ -1,6 +1,9 @@
 #autorun
 (
    {unless $patched
+      {set $is_xbox {if_else {== {elem {find $syscfg objects OvershellDir types overshell_slot get_native_platform} 1} xbox} TRUE FALSE}}
+      {set $is_ps3 {if_else {== {elem {find $syscfg objects OvershellDir types overshell_slot get_native_platform} 1} ps3} TRUE FALSE}}
+      {set $is_wii {if_else {== {elem {find $syscfg objects OvershellDir types overshell_slot get_native_platform} 1} wii} TRUE FALSE}}
       {set $speedmod 1}
       {set $trackspeed_guitar 1}
       {set $trackspeed_bass 1}
@@ -17,7 +20,6 @@
       {set $mbblend TRUE}
       {set $emulatefps 30}
       {set $vsyncrate 1}
-      {set_elem {find $syscfg tour default_difficulty} 1 kDifficultyExpert}
       {set_elem {find $syscfg beatmatcher watcher pitch_bend_range} 1 {` $whammypb }}
       {set_elem {find $syscfg beatmatcher watcher cymbal_autoplay_ms} 1 {` {if_else $cymbal_ap 90 0} }}
       {set_elem {find $syscfg beatmatcher watcher trill_interval_ms} 1
@@ -96,9 +98,10 @@
          }
       }
       {func plat_offset
-         ($var $xbox_off)
-         {if_else $is_xbox
-            {+ $var $xbox_off}
+         ($var $xbox_off $wii_off)
+         {cond
+            ($is_xbox {+ $var $xbox_off})
+            ($is_wii {+ $var $wii_off})
             $var
          }
       }
@@ -111,6 +114,9 @@
          {if $lastloc
             {if $blackbg
                {$loc set_showing FALSE}
+            }
+            {if $knuckles
+               {$loc iterate Mat $m {$m set color {pack_color 1 0 0}}}
             }
             {$loc iterate PostProc $p
                {if {|| {!= $emulatefps 30} {if $prevfps {!= $prevfps $emulatefps}}}
@@ -125,6 +131,10 @@
                {unless $scrbloom {$p set bloom_intensity 0}}
             }
             {$loc iterate WorldDir $wd
+               {if $knuckles
+                  {$wd iterate Mat $m {$m set color {pack_color 1 0 0}}}
+                  {$wd iterate BandCharacter $bc {$bc iterate Mat $m {$m set color {pack_color 1 0 0}}}}
+               }
                {$wd iterate BandCamShot $bcs
                   {unless $fxdof
                      {$bcs set use_depth_of_field FALSE}
@@ -184,15 +194,23 @@
       }
       {push_back {find $syscfg objects WorldDir types vignette_shell enter}
          {`
-            {if $no_menu_bg
-               {if [scene0]
-                  {[scene0] set_showing FALSE}
+            {do
+               {if $knuckles
+                  {if [scene0]
+                     {[scene0] iterate Mat $m {$m set color {pack_color 1 0 0}}}
+                     {[scene0] iterate BandCharacter $bc {$bc iterate Mat $m {$m set color {pack_color 1 0 0}}}}
+                  }
+               }
+               {if $no_menu_bg
+                  {if [scene0]
+                     {[scene0] set_showing FALSE}
+                  }
                }
             }
          }
       }
       {push_back
-         {find {elem {find $syscfg ui init} {plat_offset 116 1}} on_extend}
+         {find {elem {find $syscfg ui init} {plat_offset 116 1 -2}} on_extend}
          {`
             {if {&& {> $speedmod 1} {is_leader_local}}
                {beatmatch set_music_speed $speedmod}
@@ -217,17 +235,14 @@
             }
          }
       }
-      {set_elem {elem {elem {elem {find {elem {find $syscfg ui init} 284} move_slots} 2} 2} 3} 2
+      {set_elem {elem {elem {elem {find {elem {find $syscfg ui init} {plat_offset 284 0 11}} move_slots} 2} 2} 3} 2
          {` {if_else {&& {user_mgr get_user_from_slot 2} {== {{user_mgr get_user_from_slot 2} get_track_type} 3}} 1 2} }
       }
       {resize
-         {elem {elem {elem {elem {find {elem {find $syscfg ui init} 284} player_panels} 2} 1} 45} 6} 0
+         {elem {find {elem {elem {find {elem {find $syscfg ui init} {plat_offset 284 0 11}} player_panels} 2} 1} 10} 6} 1
       }
       {push_back
-         {elem {elem {elem {elem {find {elem {find $syscfg ui init} 284} player_panels} 2} 1} 45} 6} update_view
-      }
-      {push_back
-         {elem {elem {elem {elem {find {elem {find $syscfg ui init} 284} player_panels} 2} 1} 45} 7}
+         {elem {find {elem {elem {find {elem {find $syscfg ui init} {plat_offset 284 0 11}} player_panels} 2} 1} 10} 7}
          {`
             {switch {{$this get_user} get_controller_type}
                (kControllerDrum
@@ -292,7 +307,7 @@
          }
       }
       {set_elem
-         {find {elem {elem {elem {find {elem {find $syscfg ui init} 284} player_panels} 2} 1} 29} on_cancel} 1
+         {find {find {elem {elem {find {elem {find $syscfg ui init} {plat_offset 284 0 11}} player_panels} 2} 1} 45} on_cancel} 1
          {`
             {if_else $os_menu
                {set_main_to_lst}
@@ -301,7 +316,7 @@
          }
       }
       {push_back
-         {elem {find $syscfg ui init} {plat_offset 121 1}}
+         {elem {find $syscfg ui init} {plat_offset 121 1 -2}}
          {`
             (enter
                {set_graphics $this}
@@ -309,7 +324,7 @@
          }
       }
       {push_back
-         {elem {elem {elem {find {elem {find $syscfg ui init} 284} player_panels} 2} 1} 29}
+         {find {elem {elem {find {elem {find $syscfg ui init} {plat_offset 284 0 11}} player_panels} 2} 1} 45}
          {`
             (enter
                {options_extras.lst set_selected 0}
@@ -325,7 +340,7 @@
          }
       }
       {push_back
-         {elem {elem {elem {find {elem {find $syscfg ui init} 284} player_panels} 2} 1} 29}
+         {find {elem {elem {find {elem {find $syscfg ui init} {plat_offset 284 0 11}} player_panels} 2} 1} 45}
          {`
             (BUTTON_DOWN_MSG
                {switch $action
@@ -517,7 +532,7 @@
                         )
                      }
                   )
-                  {elem {elem {find {elem {find $syscfg ui init} 109} button_down} 2} 5} ; kDataUnhandled
+                  {elem {find $syscfg player handlers deploy} 1} ; kDataUnhandled
                }
             )
          }
@@ -545,7 +560,7 @@
                {if_else $autodeploy "Drum Auto Deploy: ON" "Drum Auto Deploy: OFF"}
                {if_else $no_mv_venues "Disable Video Venues: ON" "Disable Video Venues: OFF"}
                {if_else $no_menu_bg "Disable Menu Backgrounds: ON" "Disable Menu Backgrounds: OFF"}
-               {if_else $greennday "Green Day: ON" "Green Day: OFF"}
+               {if_else $knuckles "& knuckles: ON" "& knuckles: OFF"}
             )
          }
       }
@@ -622,8 +637,8 @@
             (("Disable Menu Backgrounds: ON" "Disable Menu Backgrounds: OFF")
                {set $no_menu_bg {! $no_menu_bg}}
             )
-            (("Green Day: ON" "Green Day: OFF")
-               {set $greennday {! $greennday}}
+            (("& knuckles: ON" "& knuckles: OFF")
+               {set $knuckles {! $knuckles}}
             )
             ("Speed Settings"
                {set $os_menu 2}
@@ -656,11 +671,11 @@
             )
          )
          {push_back
-            {elem {elem {elem {elem {elem {find {elem {find $syscfg ui init} 284} player_panels} 2} 1} 29} 2} 2} $item
+            {elem {elem {find {elem {elem {find {elem {find $syscfg ui init} {plat_offset 284 0 11}} player_panels} 2} 1} 45} 2} 2} $item
          }
       }
       {push_back
-         {elem {elem {elem {elem {find {elem {find $syscfg ui init} 284} player_panels} 2} 1} 29} 2}
+         {elem {find {elem {elem {find {elem {find $syscfg ui init} {plat_offset 284 0 11}} player_panels} 2} 1} 45} 2}
          {`
             {switch $os_menu
                (1 {set_modifiers_to_lst})
@@ -671,7 +686,7 @@
             }
          }
       }
-      {set_elem {elem {elem {find {elem {find $syscfg ui init} {plat_offset 340 1}} load_panels} 1} 2} 2
+      {set_elem {elem {elem {find {elem {find $syscfg ui init} {plat_offset 340 1 14}} load_panels} 1} 2} 2
          {`
             {if_else $no_mv_venues
                {do
@@ -716,7 +731,7 @@
             }
          }
       }
-      {set_elem {find {elem {find $syscfg ui init} {plat_offset 293 1}} set_results} 1
+      {set_elem {find {elem {find $syscfg ui init} {plat_offset 293 0 11}} set_results} 1
          {`
             {do
                ($short_name {meta_performer get_completed_song})
@@ -729,7 +744,7 @@
             }
          }
       }
-      {set_elem {find {elem {find $syscfg ui init} {plat_offset 309 1}} enter} 2
+      {set_elem {find {elem {find $syscfg ui init} {plat_offset 309 0 14}} enter} 2
          {`
             {do
                ($short_name {meta_performer song})
@@ -747,7 +762,7 @@
             {if {== {ui current_screen} coop_endgame_screen} {push_back $options overshell_choose_part}}
          }
       }
-      {push_back {elem {elem {find {elem {elem {elem {find {elem {find $syscfg ui init} 284} player_panels} 2} 1} 13} component_select} 2} 3}
+      {push_back {elem {elem {find {find {elem {elem {find {elem {find $syscfg ui init} {plat_offset 284 0 11}} player_panels} 2} 1} 7} component_select} 2} 3}
          {`
             (overshell_choose_part
                {do
@@ -757,20 +772,70 @@
             )
          }
       }
-      {set_elem {elem {elem {find {elem {find $syscfg ui init} {plat_offset 453 1}} goto_next_screen} 1} 2} 4
-         {`
-            {script_task kTaskUISeconds
-               (delay 2)
-               (script {ui goto_screen preloading_screen})
+      {if $is_ps3
+         {set_elem {elem {elem {find {elem {find $syscfg ui init} 453} goto_next_screen} 1} 2} 4
+            {`
+               {script_task kTaskUISeconds
+                  (delay 2)
+                  (script {ui goto_screen preloading_screen})
+               }
+            }
+         }
+         {set_elem {find {elem {find $syscfg ui init} 455} component_select} 5
+            {`
+               {script_task kTaskUISeconds
+                  (delay 2)
+                  (script {ui goto_screen preloading_screen})
+               }
             }
          }
       }
-      {set_elem {find {elem {find $syscfg ui init} {plat_offset 455 1}} component_select} 5
+      {set_elem {find {elem {find $syscfg ui init} {plat_offset 486 2 72}} show_locked_dialog} 1
          {`
-            {script_task kTaskUISeconds
-               (delay 2)
-               (script {ui goto_screen preloading_screen})
+            {if {! {closet_mgr is_character_loading}}
+               {ui push_screen choose_color_screen}
             }
+         }
+      }
+      {set_elem {find {elem {find {elem {find $syscfg ui init} {plat_offset 486 2 72}} component_select} 2} tattoos.btn} 1
+         {`
+            {do
+               {$this store_focus_component}
+               {ui goto_screen customize_tattoo_screen}
+            }
+         }
+      }
+      {set_elem {find {elem {find {elem {find $syscfg ui init} {plat_offset 486 2 72}} component_select} 2} face_paint.btn} 1
+         {`
+            {do
+               {$this store_focus_component}
+               {$this prepare_patch_edit kPatchTattoo}
+               {$this set_patch_menu_return_state kCustomizeState_HairAndMakeup}
+               {$this set_focus_component kCustomizeState_PatchMenu edit.btn}
+               {$this set_state kCustomizeState_PatchMenu}
+            }
+         }
+      }
+      {if {! $is_wii}
+         {set_elem {find {elem {find {elem {find $syscfg ui init} {plat_offset 486 2}} component_select} 2} premium_assets.lst} 2
+            {`
+               {do
+                  {closet_mgr finalize_changes TRUE {$this in_clothing_state}}
+                  {$this leave_state FALSE}
+               }
+            }
+         }
+      }
+      {passive_messages_panel queue_message {symbol "CON Patch by Synchrony loaded succesfully!"}}
+      {passive_messages_panel queue_message {symbol "Mod settings can be adjusted in extras"}}
+      {passive_messages_panel queue_message {symbol "Some scripting uses some elements from RB3 Deluxe by MiloHax"}}
+      {do
+         ($int {random_int 0 1000000})
+         {switch $int
+            (2112 {passive_messages_panel queue_message {symbol "I missed the part where that's my problem"}})
+            (10516 {passive_messages_panel queue_message {symbol "go play amplitude on the ps2"}})
+            (32503 {passive_messages_panel queue_message {symbol "go play frequency on the ps2"}})
+            (42319 {passive_messages_panel queue_message {symbol "hold up gamer please"}})
          }
       }
       {set $patched TRUE}

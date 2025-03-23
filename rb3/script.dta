@@ -20,6 +20,51 @@
       (ps3 {set $is_ps3 TRUE})
       (wii {set $is_wii TRUE})
    }
+   {set $guitar_map_array {array ()}}
+   {set $keys_map_array {array ()}}
+   {set $vocals_map_array {array ()}}
+   {foreach_int $elem 1 {size {find $syscfg joypad instrument_mapping}}
+      {switch {elem {elem {find $syscfg joypad instrument_mapping} $elem} 1}
+         (kControllerGuitar {push_back $guitar_map_array $elem})
+         (kControllerKeys {push_back $keys_map_array $elem})
+         (kControllerVocals {push_back $vocals_map_array $elem})
+      }
+   }
+   {if_else $is_wii
+      {do
+         {set $cnt_slot1 kPad_Circle}
+         {set $cnt_slot2 kPad_DRight}
+         {set $cnt_slot3 kPad_X}
+         {set $cnt_slot4 kPad_Square}
+         {set $cnt_slot5 kPad_Tri}
+         {set $cnt_star kPad_DLeft}
+         {set_elem {find $syscfg beatmatcher controller wii_remote slots} 1 {` $cnt_slot1 }}
+         {set_elem {find $syscfg beatmatcher controller wii_remote slots} 3 {` $cnt_slot2 }}
+         {set_elem {find $syscfg beatmatcher controller wii_remote slots} 5 {` $cnt_slot3 }}
+         {set_elem {find $syscfg beatmatcher controller wii_remote slots} 7 {` $cnt_slot4 }}
+         {set_elem {find $syscfg beatmatcher controller wii_remote slots} 9 {` $cnt_slot5 }}
+         {set_elem {find $syscfg beatmatcher controller wii_remote force_mercury} 1 {` $cnt_star }}
+      }
+      {do
+         {set $pad_map 1}
+         {set $cnt_slot1 kPad_L2}
+         {set $cnt_slot2 kPad_L1}
+         {set $cnt_slot3 kPad_R1}
+         {set $cnt_slot4 kPad_R2}
+         {set $cnt_slot5 kPad_X}
+         {set $cnt_star kPad_Select}
+         {set_elem {find $syscfg beatmatcher controller joypad slots} 1 {` $cnt_slot1 }}
+         {set_elem {find $syscfg beatmatcher controller joypad slots} 3 {` $cnt_slot2 }}
+         {set_elem {find $syscfg beatmatcher controller joypad slots} 5 {` $cnt_slot3 }}
+         {set_elem {find $syscfg beatmatcher controller joypad slots} 7 {` $cnt_slot4 }}
+         {set_elem {find $syscfg beatmatcher controller joypad slots} 9 {` $cnt_slot5 }}
+         {set_elem {find $syscfg beatmatcher controller joypad force_mercury} 1 {` $cnt_star }}
+
+      }
+   }
+   {set $guitar_map kControllerGuitar}
+   {set $keys_map kControllerKeys}
+   {set $vocals_map kControllerVocals}
    {set $speedmod 1}
    {set $trackspeed_guitar 1}
    {set $trackspeed_bass 1}
@@ -229,24 +274,27 @@
    {push_back
       {find {elem {find $syscfg ui init} {find_ui_elem coop_track_panel}} on_extend}
       {`
-         {if {&& {> $speedmod 1} {is_leader_local}}
-            {beatmatch set_music_speed $speedmod}
-            {session send_msg_to_all
-               {`
-                  (
-                     {do
-                        {beatmatch set_music_speed {, $speedmod}}
-                        ($display {coop_track_panel find tracker_broadcast_display})
-                        {$display set_showing TRUE}
-                        {{$display find band_message.lbl} set_showing TRUE}
-                        {$display set_challenge_type 3}
-                        {$display set_display_type 1}
-                        {$display show_brief_band_message
-                           {symbol {sprintf " Song speed set to %d%% by host" {int {+ 0.5 {* {, $speedmod} 100}}}}}
+         {do
+            {if $is_wii {rnd set_in_game {! {== $emulatefps 60}}}}
+            {if {&& {> $speedmod 1} {is_leader_local}}
+               {beatmatch set_music_speed $speedmod}
+               {session send_msg_to_all
+                  {`
+                     (
+                        {do
+                           {beatmatch set_music_speed {, $speedmod}}
+                           ($display {coop_track_panel find tracker_broadcast_display})
+                           {$display set_showing TRUE}
+                           {{$display find band_message.lbl} set_showing TRUE}
+                           {$display set_challenge_type 3}
+                           {$display set_display_type 1}
+                           {$display show_brief_band_message
+                              {symbol {sprintf " Song speed set to %d%% by host" {int {+ 0.5 {* {, $speedmod} 100}}}}}
+                           }
                         }
-                     }
-                  )
-                  kNetReliable
+                     )
+                     kNetReliable
+                  }
                }
             }
          }
@@ -325,9 +373,26 @@
       {set_elem
          {find {find {elem {elem {find {elem {find $syscfg ui init} $os} player_panels} 2} 1} 45} on_cancel} 1
          {`
-            {if_else $os_menu
-               {set_main_to_lst}
-               {$this show_game_options}
+            {do
+               {if {== $os_menu 4}
+                  {foreach $elem $guitar_map_array
+                     {set_elem {elem {find $syscfg joypad instrument_mapping} $elem} 1 $guitar_map}
+                  }
+                  {foreach $elem $keys_map_array
+                     {set_elem {elem {find $syscfg joypad instrument_mapping} $elem} 1 $keys_map}
+                  }
+                  {foreach $elem $vocals_map_array
+                     {set_elem {elem {find $syscfg joypad instrument_mapping} $elem} 1 $vocals_map}
+                  }
+                  {foreach $type (analog dualshock)
+                     {set_elem {find $syscfg joypad controller_mapping $type} 1 {switch $pad_map (1 joypad) (2 ro_guitar_xbox) (3 hx_drums_xbox) (4 ro_guitar_ps3) (5 guitar)}}
+                  }
+                  {overshell update_all}
+               }
+               {if_else $os_menu
+                  {set_main_to_lst}
+                  {$this show_game_options}
+               }
             }
          }
       }
@@ -421,7 +486,7 @@
                                  {set $emulatefps
                                     {switch $emulatefps
                                        (60 30)
-                                       (30 24)
+                                       (30 {if_else $is_wii 30 24})
                                        (24 15)
                                        (15 12)
                                        (12 6)
@@ -443,6 +508,59 @@
                                  {rnd set_sync $vsyncrate}
                               )
                            }
+                        )
+                        (4
+                           {switch {options_extras.lst selected_pos}
+                              (1 {set $cnt_slot1 {l_set_slot $cnt_slot1}})
+                              (2 {set $cnt_slot2 {l_set_slot $cnt_slot2}})
+                              (3 {set $cnt_slot3 {l_set_slot $cnt_slot3}})
+                              (4 {set $cnt_slot4 {l_set_slot $cnt_slot4}})
+                              (5 {set $cnt_slot5 {l_set_slot $cnt_slot5}})
+                              (6 {set $cnt_star {l_set_slot $cnt_star}})
+                              (7
+                                 {set $guitar_map
+                                    {switch $guitar_map
+                                       (kControllerKeys kControllerVocals)
+                                       (kControllerVocals kControllerDrum)
+                                       (kControllerDrum kControllerGuitar)
+                                       kControllerGuitar
+                                    }
+                                 }
+                              )
+                              (8
+                                 {set $keys_map
+                                    {switch $keys_map
+                                       (kControllerKeys kControllerVocals)
+                                       (kControllerVocals kControllerDrum)
+                                       (kControllerDrum kControllerGuitar)
+                                       kControllerGuitar
+                                    }
+                                 }
+                              )
+                              (9
+                                 {set $vocals_map
+                                    {switch $vocals_map
+                                       (kControllerKeys kControllerVocals)
+                                       (kControllerVocals kControllerDrum)
+                                       (kControllerDrum kControllerGuitar)
+                                       kControllerGuitar
+                                    }
+                                 }
+                              )
+                              (10
+                                 {set $pad_map
+                                    {switch $pad_map
+                                       (5 4)
+                                       (4 3)
+                                       (3 2)
+                                       (2 1)
+                                       1
+                                    }
+                                 }
+                                 {set_pad_map}
+                              )
+                           }
+                           {set_cnt_to_lst}
                         )
                      }
                   )
@@ -538,6 +656,59 @@
                               )
                            }
                         )
+                        (4
+                           {switch {options_extras.lst selected_pos}
+                              (1 {set $cnt_slot1 {r_set_slot $cnt_slot1}})
+                              (2 {set $cnt_slot2 {r_set_slot $cnt_slot2}})
+                              (3 {set $cnt_slot3 {r_set_slot $cnt_slot3}})
+                              (4 {set $cnt_slot4 {r_set_slot $cnt_slot4}})
+                              (5 {set $cnt_slot5 {r_set_slot $cnt_slot5}})
+                              (6 {set $cnt_star {r_set_slot $cnt_star}})
+                              (7
+                                 {set $guitar_map
+                                    {switch $guitar_map
+                                       (kControllerGuitar kControllerDrum)
+                                       (kControllerDrum kControllerVocals)
+                                       (kControllerVocals kControllerKeys)
+                                       kControllerKeys
+                                    }
+                                 }
+                              )
+                              (8
+                                 {set $keys_map
+                                    {switch $keys_map
+                                       (kControllerGuitar kControllerDrum)
+                                       (kControllerDrum kControllerVocals)
+                                       (kControllerVocals kControllerKeys)
+                                       kControllerKeys
+                                    }
+                                 }
+                              )
+                              (9
+                                 {set $vocals_map
+                                    {switch $vocals_map
+                                       (kControllerGuitar kControllerDrum)
+                                       (kControllerDrum kControllerVocals)
+                                       (kControllerVocals kControllerKeys)
+                                       kControllerKeys
+                                    }
+                                 }
+                              )
+                              (10
+                                 {set $pad_map
+                                    {switch $pad_map
+                                       (5 4)
+                                       (4 3)
+                                       (3 2)
+                                       (2 1)
+                                       1
+                                    }
+                                 }
+                                 {set_pad_map}
+                              )
+                           }
+                           {set_cnt_to_lst}
+                        )
                      }
                   )
                   {elem {find $syscfg player handlers deploy} 1} ; kDataUnhandled
@@ -621,6 +792,13 @@
             (("Depth of Field: ON" "Depth of Field: OFF")
                {set $fxdof {! $fxdof}}
             )
+            ("Controller Settings"
+               {set $os_menu 4}
+               {options_extras.lst set_selected 0}
+            )
+            (("Any instrument Any Slot: ON" "Any instrument Any Slot: OFF")
+               {set $any_inst_all_slots {! $any_inst_all_slots}}
+            )
          )
          {push_back
             {elem {elem {find {elem {elem {find {elem {find $syscfg ui init} $os} player_panels} 2} 1} 45} 2} 2} $item
@@ -657,6 +835,7 @@
             "Modifiers"
             "Speed Settings"
             "Graphics Settings"
+            "Controller Settings"
          )
       }
    }
@@ -703,6 +882,84 @@
             {if_else $camerashake "Camera Shake: ON" "Camera Shake: OFF"}
             {if_else $mbblend "Motion Blur: ON" "Motion Blur: OFF"}
          )
+      }
+   }
+   {func set_cnt_to_lst
+      {options_extras.lst set_data
+         (
+            {if_else $any_inst_all_slots "Any instrument Any Slot: ON" "Any instrument Any Slot: OFF"}
+            {sprint "- Slot 1: " {get_btn_from_var $cnt_slot1} " +"}
+            {sprint "- Slot 2: " {get_btn_from_var $cnt_slot2} " +"}
+            {sprint "- Slot 3: " {get_btn_from_var $cnt_slot3} " +"}
+            {sprint "- Slot 4: " {get_btn_from_var $cnt_slot4} " +"}
+            {sprint "- Slot 5: " {get_btn_from_var $cnt_slot5} " +"}
+            {sprint "- Overdrive: " {get_btn_from_var $cnt_star} " +"}
+            {sprint "- Guitar in: " {switch $guitar_map (kControllerGuitar "Guitar") (kControllerDrum "Drum") (kControllerVocals "Vocals") (kControllerKeys "Keys")} " Slot +"}
+            {sprint "- Keys in: " {switch $keys_map (kControllerGuitar "Guitar") (kControllerDrum "Drum") (kControllerVocals "Vocals") (kControllerKeys "Keys")} " Slot +"}
+            {sprint "- Vocals in: " {switch $vocals_map (kControllerGuitar "Guitar") (kControllerDrum "Drum") (kControllerVocals "Vocals") (kControllerKeys "Keys")} " Slot +"}
+            {if_else $is_wii " " {sprint "- Pad Mapping: " {switch $pad_map (1 "Custom") (2 "RB Guitar") (3 "Drum") (4 "GH Guitar") (5 "PS2 Guitar")} " +"}}
+         )
+      }
+   }
+   {func get_btn_from_var
+      ($var)
+      {switch $var
+         (kPad_L2 "LT")
+         (kPad_L1 "LB")
+         (kPad_R1 "RB")
+         (kPad_R2 "RT")
+         (kPad_X "A")
+         (kPad_Circle "B")
+         (kPad_Square {if_else $is_wii "1" "X"})
+         (kPad_Tri {if_else $is_wii "2" "Y"})
+         (kPad_DUp "Up")
+         (kPad_DDown "Down")
+         (kPad_DLeft "Left")
+         (kPad_DRight "Right")
+         (kPad_L3 "LS")
+         (kPad_R3 "RS")
+         (kPad_Select {if_else $is_wii "-" "Back"})
+         "ERROR"
+      }
+   }
+   {func l_set_slot
+      ($var)
+      {switch $var
+         (kPad_L1 kPad_L2)
+         (kPad_R1 kPad_L1)
+         (kPad_R2 kPad_R1)
+         (kPad_X kPad_R2)
+         (kPad_Circle kPad_X)
+         (kPad_Square kPad_Circle)
+         (kPad_Tri kPad_Square)
+         (kPad_DUp kPad_Tri)
+         (kPad_DDown kPad_DUp)
+         (kPad_DLeft kPad_DDown)
+         (kPad_DRight kPad_DLeft)
+         (kPad_L3 kPad_DRight)
+         (kPad_R3 kPad_L3)
+         (kPad_Select kPad_R3)
+         kPad_L2
+      }
+   }
+   {func r_set_slot
+      ($var)
+      {switch $var
+         (kPad_L2 kPad_L1)
+         (kPad_L1 kPad_R1)
+         (kPad_R1 kPad_R2)
+         (kPad_R2 kPad_X)
+         (kPad_X kPad_Circle)
+         (kPad_Circle kPad_Square)
+         (kPad_Square kPad_Tri)
+         (kPad_Tri kPad_DUp)
+         (kPad_DUp kPad_DDown)
+         (kPad_DDown kPad_DLeft)
+         (kPad_DLeft kPad_DRight)
+         (kPad_DRight kPad_L3)
+         (kPad_L3 kPad_R3)
+         (kPad_R3 kPad_Select)
+         kPad_Select
       }
    }
    {set_elem {elem {elem {find {elem {find $syscfg ui init} {find_ui_elem part_difficulty_screen}} load_panels} 1} 2} 2

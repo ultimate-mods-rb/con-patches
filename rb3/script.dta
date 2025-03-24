@@ -1,7 +1,7 @@
 #autorun
 {unless $patched
    {set $syscfg_init_size {size {find $syscfg ui init}}}
-   {set $new_command {elem {elem {find $syscfg ui init} 300} 0}}
+   {set $new_command {elem {elem {find $syscfg ui init} 320} 0}}
    {func find_ui_elem
       ($search)
       {foreach_int $num 1 $syscfg_init_size

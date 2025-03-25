@@ -799,6 +799,13 @@
             (("Any instrument Any Slot: ON" "Any instrument Any Slot: OFF")
                {set $any_inst_all_slots {! $any_inst_all_slots}}
             )
+            ("Other"
+               {set $os_menu 5}
+               {options_extras.lst set_selected 0}
+            )
+            (("Disable Practice Fast Restart: ON" "Disable Practice Fast Restart: OFF")
+               {set $noselrsrt {! $noselrsrt}}
+            )
          )
          {push_back
             {elem {elem {find {elem {elem {find {elem {find $syscfg ui init} $os} player_panels} 2} 1} 45} 2} 2} $item
@@ -836,6 +843,7 @@
             "Speed Settings"
             "Graphics Settings"
             "Controller Settings"
+            "Other"
          )
       }
    }
@@ -898,6 +906,13 @@
             {sprint "- Keys in: " {switch $keys_map (kControllerGuitar "Guitar") (kControllerDrum "Drum") (kControllerVocals "Vocals") (kControllerKeys "Keys")} " Slot +"}
             {sprint "- Vocals in: " {switch $vocals_map (kControllerGuitar "Guitar") (kControllerDrum "Drum") (kControllerVocals "Vocals") (kControllerKeys "Keys")} " Slot +"}
             {if_else $is_wii " " {sprint "- Pad Mapping: " {switch $pad_map (1 "Custom") (2 "RB Guitar") (3 "Drum") (4 "GH Guitar") (5 "PS2 Guitar")} " +"}}
+         )
+      }
+   }
+   {func set_other_to_lst
+      {options_extras.lst set_data
+         (
+            {if_else $noselrsrt "Disable Practice Fast Restart: ON" "Disable Practice Fast Restart: OFF"}
          )
       }
    }
@@ -1092,6 +1107,13 @@
                   {$this leave_state FALSE}
                }
             }
+         }
+      }
+   }
+   {push_back {find {elem {find $syscfg ui init} {find_ui_elem practice_panel}} button_down}
+      {`
+         {if {&& {== $action kAction_ViewModify} {! $noselrsrt}}
+            {session end_game kRestart}
          }
       }
    }

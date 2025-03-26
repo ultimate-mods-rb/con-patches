@@ -403,9 +403,9 @@
                {`
                   {do
                      {$this set_showing {! {gamemode in_mode jukebox}}}
-                     ;{if {gamemode in_mode jukebox}
+                     {if {gamemode in_mode jukebox}
                         {beatmatch foreach_active_player $player {$player set_auto_play enable}}
-                     ;}
+                     }
                      {set_song_speed}
                      {set_tp_vars}
                      {beatmatch set_kick_autoplay {if_else {gamemode get online_play_required} FALSE $autokick}}

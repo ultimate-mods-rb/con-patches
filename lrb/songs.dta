@@ -2483,8 +2483,8 @@
                )
                {push_back {find $syscfg missing_song_data}
                   {if_else {has_substr $song UGC}
-                     ($song (rating 1) (version 0))
-                     ($song (rating 1))
+                     {` ({, $song } (rating 1) (version 0)) }
+                     {` ({, $song } (rating 1)) }
                   }
                }
             }

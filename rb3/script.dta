@@ -202,10 +202,12 @@
                }
                {unless $camerashake
                   {foreach_int $i 0 {$bcs size (keyframes)}
-                     {$bcs set (keyframes $i shake_noisefreq) {* {$bcs get (keyframes $i shake_noisefreq)} 0}}
-                     {$bcs set (keyframes $i shake_noiseamp) {* {$bcs get (keyframes $i shake_noiseamp)} 0}}
-                     {$bcs set (keyframes $i shake_maxangle x) {* {$bcs get (keyframes $i shake_maxangle x)} 0}}
-                     {$bcs set (keyframes $i shake_maxangle y) {* {$bcs get (keyframes $i shake_maxangle y)} 0}}
+                     {$bcs set (keyframes $i shake_noisefreq) 0}
+                     {$bcs set (keyframes $i shake_noiseamp) 0}
+                     {if {! $is_wii}
+                        {$bcs set (keyframes $i shake_maxangle x) 0}
+                        {$bcs set (keyframes $i shake_maxangle y) 0}
+                     }
                   }
                }
             }

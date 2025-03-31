@@ -177,7 +177,7 @@
             {$loc set_showing FALSE}
          }
          {if $knuckles
-            {$loc iterate Mat $m {$m set color {pack_color 1 0 0}}}
+            {$loc iterate Mat $m {if_else $is_wii {$m set color {pack_color 1 0 0}} {$m set diffuse_tex {overshell find knuckles.tex}}}}
          }
          {$loc iterate PostProc $p
             {if {|| {!= $emulatefps 30} {if $prevfps {!= $prevfps $emulatefps}}}
@@ -193,8 +193,7 @@
          }
          {$loc iterate WorldDir $wd
             {if $knuckles
-               {$wd iterate Mat $m {$m set color {pack_color 1 0 0}}}
-               {$wd iterate BandCharacter $bc {$bc iterate Mat $m {$m set color {pack_color 1 0 0}}}}
+               {$wd iterate Mat $m {if_else $is_wii {$m set color {pack_color 1 0 0}} {$m set diffuse_tex {overshell find knuckles.tex}}}}
             }
             {$wd iterate BandCamShot $bcs
                {unless $fxdof
@@ -261,8 +260,7 @@
          {do
             {if $knuckles
                {if [scene0]
-                  {[scene0] iterate Mat $m {$m set color {pack_color 1 0 0}}}
-                  {[scene0] iterate BandCharacter $bc {$bc iterate Mat $m {$m set color {pack_color 1 0 0}}}}
+                  {[scene0] iterate Mat $m {if_else $is_wii {$m set color {pack_color 1 0 0}} {$m set diffuse_tex {overshell find knuckles.tex}}}}
                }
             }
             {if $no_menu_bg
@@ -270,6 +268,13 @@
                   {[scene0] set_showing FALSE}
                }
             }
+         }
+      }
+   }
+   {push_back {find $syscfg objects WorldDir types vignette_scene enter}
+      {`
+         {if $knuckles
+            {$this iterate Mat $m {if_else $is_wii {$m set color {pack_color 1 0 0}} {$m set diffuse_tex {overshell find knuckles.tex}}}}
          }
       }
    }
@@ -306,6 +311,12 @@
       {elem {find $syscfg ui init} {find_ui_elem world_panel}}
       {`
          (enter
+            {if {! {&& $is_wii $heloaded}}
+               {with {load_objects {song_mgr song_file_path conpatch ".milo"}}
+                  {knuckles.tex set_name knuckles.tex {overshell loaded_dir}}
+               }
+               {set $heloaded TRUE}
+            }
             {set_graphics $this}
          )
       }
